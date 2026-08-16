@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © File Converter contributors.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<!--
+	Hand-off channel from the (sandboxed) FileConverterQuickAction extension:
+	it writes the selected file paths to a temp list file and opens
+	fileconverter://convert?preset=<name>&list=<tempPath>, mirroring the
+	Windows extension's "--conversion-preset <name> --input-files <path>"
+	argv hand-off (see FileConverterExtension.cs on the Windows side).
+	-->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>io.file-converter.mac.convert</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fileconverter</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

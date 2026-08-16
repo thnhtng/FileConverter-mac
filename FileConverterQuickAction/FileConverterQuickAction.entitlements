@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	App Extensions are required to be sandboxed by the extension-point
+	architecture itself (Finder hosts this process), independent of the main
+	app's Developer ID / non-MAS distribution. Do not add exec/process
+	entitlements here — the extension must hand off to the main app instead
+	of shelling out to ffmpeg/ImageMagick directly. See ActionRequestHandler.swift.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.files.user-selected.read-only</key>
+	<true/>
+</dict>
+</plist>

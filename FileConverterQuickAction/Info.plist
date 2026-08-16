@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>XPC!</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>NSExtension</key>
+	<dict>
+		<!--
+		com.apple.services is the Action Extension point that surfaces in
+		both the Services menu and Finder's right-click "Quick Actions"
+		submenu — the closest macOS analog to the Windows Explorer
+		context-menu shell extension (FileConverterExtension.cs).
+		-->
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.services</string>
+		<key>NSExtensionPrincipalClass</key>
+		<string>ActionRequestHandler</string>
+		<key>NSExtensionAttributes</key>
+		<dict>
+			<key>NSExtensionServiceRoleType</key>
+			<string>NSExtensionServiceRoleTypeEditor</string>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>NSExtensionServiceMenuItemTitle</key>
+				<string>Convert with File Converter…</string>
+			</dict>
+			<!--
+			Matches the supported input categories from
+			InputCategoryClassifier.swift (ported from Helpers.cs
+			GetExtensionCategory): audio, video, image, PDF, and the
+			common Office document UTIs. Every item in the selection must
+			conform to at least one of these — an all-or-nothing rule
+			(like the Windows extension's per-preset InputTypes filtering,
+			simplified since this is one static menu entry, not a
+			per-preset submenu — see AppModel.swift's LaunchState note).
+			-->
+			<key>NSExtensionActivationRule</key>
+			<string>SUBQUERY (
+	extensionItems,
+	$extensionItem,
+	SUBQUERY (
+		$extensionItem.attachments,
+		$attachment,
+		ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.audio-visual-content"
+		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.image"
+		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "com.adobe.pdf"
+		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.openxmlformats.wordprocessingml.document"
+		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.openxmlformats.spreadsheetml.sheet"
+		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.openxmlformats.presentationml.presentation"
+		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "com.microsoft.word.doc"
+		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "com.microsoft.excel.xls"
+		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "com.microsoft.powerpoint.ppt"
+		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.oasis.opendocument.text"
+		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.oasis.opendocument.spreadsheet"
+		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.oasis.opendocument.presentation"
+	).@count == $extensionItem.attachments.@count
+).@count == extensionItems.@count</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

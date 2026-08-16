@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	Direct (non-Mac-App-Store) distribution, Developer ID signed + notarized —
+	no App Sandbox needed here, which is exactly why the main app (not the
+	Quick Action extension) is the process that shells out to the bundled
+	ffmpeg/ImageMagick/soffice binaries. See macOS/FileConverterMac/README.md
+	"Sandbox spike" section.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+</dict>
+</plist>

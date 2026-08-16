@@ -1,0 +1,70 @@
+name: FileConverterMac
+options:
+  bundleIdPrefix: io.file-converter.mac
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.10"
+    ENABLE_HARDENED_RUNTIME: YES
+    CODE_SIGN_STYLE: Automatic
+
+packages:
+  FileConverterKit:
+    path: Packages/FileConverterKit
+
+targets:
+  FileConverter:
+    type: application
+    platform: macOS
+    sources:
+      - path: FileConverter
+        excludes:
+          - Info.plist
+          - FileConverter.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.file-converter.mac
+        PRODUCT_NAME: File Converter
+        # Info.plist and entitlements below are hand-authored (CFBundleURLTypes,
+        # comments) — reference them as plain build settings so xcodegen never
+        # regenerates their contents from a template.
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: FileConverter/Info.plist
+        CODE_SIGN_ENTITLEMENTS: FileConverter/FileConverter.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      - package: FileConverterKit
+      - target: FileConverterQuickAction
+        embed: true
+
+  FileConverterQuickAction:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: FileConverterQuickAction
+        excludes:
+          - Info.plist
+          - FileConverterQuickAction.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.file-converter.mac.QuickAction
+        PRODUCT_NAME: File Converter Quick Action
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: FileConverterQuickAction/Info.plist
+        CODE_SIGN_ENTITLEMENTS: FileConverterQuickAction/FileConverterQuickAction.entitlements
+        SKIP_INSTALL: YES
+
+schemes:
+  FileConverter:
+    build:
+      targets:
+        FileConverter: all
+    run:
+      config: Debug
+    test:
+      config: Debug
