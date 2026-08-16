@@ -56,7 +56,7 @@
 	SUBQUERY (
 		$extensionItem.attachments,
 		$attachment,
-		ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.audio-visual-content"
+		ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.audiovisual-content"
 		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.image"
 		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "com.adobe.pdf"
 		OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.openxmlformats.wordprocessingml.document"
