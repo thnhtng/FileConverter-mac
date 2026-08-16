@@ -19,6 +19,14 @@
 
 set -euo pipefail
 
+# Guard against a stale/deleted working directory in the invoking shell
+# (e.g. a cloud/CI terminal whose cwd was removed out from under it) — every
+# subsequent command here (brew, curl, mktemp, ...) would otherwise fail at
+# startup with "getcwd: cannot access parent directories". A fresh `cd` in
+# THIS subshell recovers cleanly even when the parent shell is already
+# broken, since it doesn't need to read the old cwd, only replace it.
+cd "$HOME" 2>/dev/null || cd /tmp
+
 REPO="thnhtng/FileConverter-mac"
 APP_NAME="File Converter.app"
 RELEASE_ASSET="FileConverter.zip"
