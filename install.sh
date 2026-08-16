@@ -12,8 +12,9 @@
 #   4. Clears the quarantine flag (defensive — files fetched via curl
 #      aren't quarantined by Gatekeeper the way browser downloads are, but
 #      this is a no-op safety net in case some proxy/AV in between tags it).
-#   5. Nudges Launch Services / Finder so the "Convert with File Converter…"
-#      Quick Action shows up in the right-click menu right away.
+#   5. Registers + explicitly approves the Quick Action with PlugInKit and
+#      nudges Finder so "Convert with File Converter…" shows up in the
+#      right-click menu right away.
 #
 # Safe to re-run any time to update to the latest release.
 
@@ -82,14 +83,36 @@ mv "$TMP_DIR/$APP_NAME" "/Applications/$APP_NAME"
 # --- 4. Clear quarantine (defensive) -------------------------------------
 xattr -cr "/Applications/$APP_NAME" 2>/dev/null || true
 
-# --- 5. Nudge Quick Action registration -----------------------------------
+# --- 5. Register + approve the Quick Action --------------------------------
+QUICK_ACTION_ID="io.file-converter.mac.QuickAction"
+QUICK_ACTION_PATH="/Applications/$APP_NAME/Contents/PlugIns/File Converter Quick Action.appex"
+
 # A plain launch is enough for Launch Services to discover the bundled
 # .appex; quit it right back out since File Converter is meant to be
 # launched per-conversion, not left open.
 open -a "/Applications/$APP_NAME" 2>/dev/null || true
 sleep 2
 osascript -e 'tell application "File Converter" to quit' 2>/dev/null || true
+
+# If a previous dev/debug build of the extension was ever registered from a
+# different path, PlugInKit can end up with multiple physical copies under
+# the same identifier, which confuses discovery. Force a clean single
+# registration for the real /Applications copy.
+pluginkit -D -m -v -i "$QUICK_ACTION_ID" 2>/dev/null | awk -F'\t' 'NF>1{print $NF}' | while IFS= read -r existing; do
+    [[ "$existing" == "$QUICK_ACTION_PATH" ]] || pluginkit -r "$existing" 2>/dev/null || true
+done
+pluginkit -a "$QUICK_ACTION_PATH" 2>/dev/null || true
+
+# Discovery alone isn't enough — PlugInKit tracks a separate per-extension
+# "user election" state (visible as a +/-/? prefix in `pluginkit -m -v`)
+# that gates whether it actually shows up in Finder's Quick Actions menu.
+# Without this, colleagues installing via this script would need to find
+# and flip "System Settings → General → Login Items & Extensions →
+# Finder Extensions" themselves before the Quick Action appears.
+pluginkit -e use -i "$QUICK_ACTION_ID" 2>/dev/null || true
+
 killall Finder 2>/dev/null || true
 
 log "Done. Right-click any supported file in Finder → Quick Actions → \"Convert with File Converter…\""
-log "(If it doesn't show up immediately, log out/in once — Launch Services can be slow to pick up new extensions.)"
+log "(If it still doesn't show up, check System Settings → General → Login Items & Extensions →"
+log " Finder Extensions, and make sure \"File Converter\" is toggled on.)"
