@@ -1,0 +1,971 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spec Check — Mockup</title>
+<style>
+:root {
+  --page: #f3f5f8; --window: #ffffff; --panel: #f7f8fa; --line: #e5e7eb; --line-strong: #d1d5db;
+  --text: #111827; --muted: #6b7280; --faint: #9ca3af;
+  --accent: #2563eb; --accent-weak: #eaf1ff; --accent-text: #1d4ed8;
+  --ok: #16a34a; --ok-weak: #e8f7ee; --warn: #d97706; --warn-weak: #fdf3e2; --bad: #dc2626; --bad-weak: #fdecec;
+  --ai: #7c3aed; --ai-weak: #f3edff;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 12px 40px rgba(15,23,42,.10);
+  --radius: 14px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0f1115; --window: #17191e; --panel: #1d2026; --line: #2a2e36; --line-strong: #3a3f49;
+    --text: #f3f4f6; --muted: #a1a7b3; --faint: #6b7280;
+    --accent: #4f8cff; --accent-weak: #1b2a47; --accent-text: #8fb4ff;
+    --ok: #34c467; --ok-weak: #15291d; --warn: #f0a432; --warn-weak: #2e2414; --bad: #f2645f; --bad-weak: #301819;
+    --ai: #a78bfa; --ai-weak: #251d3a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 40px rgba(0,0,0,.45);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font: 14px/1.5 var(--font); color: var(--text); background: var(--page); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* Page chrome */
+.topbar { display: flex; align-items: center; gap: 12px; padding: 14px 24px; max-width: 1120px; margin: 0 auto; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+.brand-mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #2563eb, #7c3aed); display: grid; place-items: center; color: #fff; font-size: 15px; }
+.demo-badge { font-size: 12px; color: var(--muted); border: 1px solid var(--line-strong); border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+.spacer { flex: 1; }
+.lang { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 999px; padding: 2px; background: var(--window); }
+.lang button { border: 0; background: none; padding: 4px 12px; border-radius: 999px; font-size: 13px; color: var(--muted); }
+.lang button[aria-pressed="true"] { background: var(--text); color: var(--window); }
+.lead { max-width: 1120px; margin: 4px auto 18px; padding: 0 24px; color: var(--muted); }
+
+/* App window */
+.window { max-width: 1072px; margin: 0 auto 40px; background: var(--window); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
+.titlebar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+.dots { display: flex; gap: 8px; }
+.dots i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+.dots i:nth-child(1) { background: #ff5f57; } .dots i:nth-child(2) { background: #febc2e; } .dots i:nth-child(3) { background: #28c840; }
+.titlebar .title { flex: 1; text-align: center; font-weight: 600; font-size: 13px; color: var(--muted); margin-right: 52px; }
+.tabs { display: flex; justify-content: center; padding: 14px 16px 6px; }
+.segmented { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 2px; }
+.segmented button { border: 0; background: none; padding: 5px 16px; border-radius: 7px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.segmented button[aria-pressed="true"] { background: var(--window); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.12); font-weight: 600; }
+
+.btn { border: 1px solid var(--line-strong); background: var(--window); border-radius: 8px; padding: 6px 12px; font-size: 13px; white-space: nowrap; }
+.btn:hover:not(:disabled) { background: var(--panel); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn.primary:hover:not(:disabled) { filter: brightness(1.06); background: var(--accent); }
+.btn.large { padding: 9px 18px; font-size: 14px; }
+.btn.link { border: 0; background: none; color: var(--accent-text); padding: 0; font-size: 12px; }
+.btn.ghost { border-color: transparent; background: none; color: var(--muted); padding: 4px 8px; }
+.btn.ai { border-color: var(--ai); color: var(--ai); }
+
+select, input[type="text"], input[type="password"], textarea {
+  border: 1px solid var(--line-strong); background: var(--window); border-radius: 8px; padding: 6px 10px; font-size: 13px; min-width: 0;
+}
+select:focus, input:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Spec Check header */
+.check-header { padding: 10px 20px 12px; display: grid; gap: 6px; }
+.check-header .row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.check-header label { color: var(--muted); font-size: 13px; }
+.check-header select { max-width: 340px; }
+.summary { color: var(--muted); font-size: 13px; }
+.notes { color: var(--faint); font-size: 12px; }
+
+.content { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); min-height: 380px; position: relative; }
+.content.drag::after { content: ""; position: absolute; inset: 6px; border: 3px solid var(--accent); border-radius: 12px; pointer-events: none; }
+
+.empty { margin: 18px; min-height: 340px; border: 2px dashed var(--line-strong); border-radius: 14px; display: grid; place-items: center; text-align: center; padding: 28px 18px; }
+.empty .icon { font-size: 40px; line-height: 1; margin-bottom: 10px; }
+.empty h2 { margin: 0 0 6px; font-size: 18px; font-weight: 600; }
+.empty p { margin: 0 auto 16px; color: var(--muted); max-width: 440px; }
+.empty .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.empty .fine { margin-top: 14px; font-size: 12px; color: var(--faint); max-width: 440px; }
+
+.list { list-style: none; margin: 0; padding: 4px 0; }
+.item { padding: 12px 20px; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.item-head { display: flex; align-items: center; gap: 12px; }
+.status { width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 13px; font-weight: 700; color: #fff; flex: none; }
+.status.pass { background: var(--ok); } .status.warning { background: var(--warn); } .status.fail { background: var(--bad); }
+.status.small { width: 16px; height: 16px; font-size: 10px; }
+.status.checking { background: none; border: 2px solid var(--line-strong); border-top-color: var(--accent); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.item-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-sub { font-size: 12px; color: var(--muted); }
+.item-main { flex: 1; min-width: 0; }
+.findings { display: grid; grid-template-columns: 16px minmax(110px, auto) minmax(0, 1fr) minmax(0, 1fr); gap: 4px 14px; margin: 10px 0 0 34px; font-size: 12.5px; align-items: center; }
+.findings .rule { font-weight: 600; }
+.findings .exp { color: var(--muted); }
+.findings .act.fail { color: var(--bad); font-weight: 600; } .findings .act.warning { color: var(--warn); font-weight: 600; }
+.more { margin: 6px 0 0 34px; }
+.plan { margin: 10px 0 0 34px; font-size: 12.5px; color: var(--muted); }
+.plan b { color: var(--text); font-weight: 600; }
+.plan ul { margin: 2px 0 0; padding-left: 18px; }
+.reason { margin: 10px 0 0 34px; font-size: 12.5px; color: var(--muted); display: flex; gap: 6px; }
+.fixed-box { margin: 10px 0 0 34px; background: var(--ok-weak); border-radius: 10px; padding: 8px 12px; font-size: 12.5px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.fixed-box.still { background: var(--bad-weak); }
+.progress { width: 110px; height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .15s linear; }
+
+.footer { display: flex; align-items: center; gap: 10px; padding: 12px 20px; flex-wrap: wrap; font-size: 13px; }
+.count { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
+.count.pass { color: var(--ok); } .count.warning { color: var(--warn); } .count.fail { color: var(--bad); } .count.zero { color: var(--muted); font-weight: 500; }
+.menu { position: relative; }
+.menu-pop { position: absolute; bottom: calc(100% + 6px); left: 0; background: var(--window); border: 1px solid var(--line-strong); border-radius: 10px; box-shadow: var(--shadow); padding: 4px; min-width: 220px; z-index: 5; }
+.menu-pop button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 7px 10px; border-radius: 6px; font-size: 13px; }
+.menu-pop button:hover { background: var(--accent-weak); }
+
+/* Presets & settings tabs */
+.pane { padding: 18px 20px 24px; min-height: 460px; }
+.pane h3 { margin: 0 0 4px; font-size: 15px; }
+.pane .muted { color: var(--muted); margin: 0 0 14px; font-size: 13px; }
+.preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.preset { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--panel); }
+.preset b { display: block; font-size: 13px; }
+.preset span { font-size: 12px; color: var(--muted); }
+.form { display: grid; gap: 12px; max-width: 620px; }
+.form-group { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: var(--panel); display: grid; gap: 10px; }
+.form-group h4 { margin: 0; font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.field { display: grid; grid-template-columns: 170px minmax(0, 1fr); align-items: center; gap: 10px; font-size: 13px; }
+.field .hint { grid-column: 2; font-size: 12px; color: var(--faint); margin-top: -6px; }
+.ok-text { color: var(--ok); } .mono { font-family: var(--mono); font-size: 12px; }
+
+/* Modal */
+.scrim { position: fixed; inset: 0; background: rgba(15,23,42,.42); display: grid; place-items: center; padding: 16px; z-index: 20; }
+.sheet { background: var(--window); border-radius: 16px; box-shadow: var(--shadow); width: min(920px, 100%); max-height: calc(100vh - 32px); display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--line); }
+.sheet.narrow { width: min(600px, 100%); }
+.sheet-body { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 0; flex: 1; overflow: hidden; }
+.spec-list { border-right: 1px solid var(--line); overflow: auto; padding: 8px; background: var(--panel); }
+.spec-list button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 8px; }
+.spec-list button[aria-current="true"] { background: var(--accent); color: #fff; }
+.spec-list button[aria-current="true"] small { color: rgba(255,255,255,.8); }
+.spec-list small { display: block; color: var(--muted); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.spec-editor { overflow: auto; padding: 16px 18px; display: grid; gap: 12px; align-content: start; }
+.sheet-foot { display: flex; gap: 10px; align-items: center; padding: 12px 16px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.sheet-pad { padding: 20px; display: grid; gap: 12px; overflow: auto; }
+.sheet-pad h3 { margin: 0; font-size: 17px; }
+.ai-banner { display: flex; gap: 10px; align-items: flex-start; background: var(--ai-weak); border-radius: 12px; padding: 12px; }
+.ai-banner b { display: block; }
+.ai-banner .grow { flex: 1; font-size: 13px; color: var(--muted); }
+textarea { width: 100%; min-height: 190px; resize: vertical; font-family: var(--mono); font-size: 12.5px; line-height: 1.55; }
+.kinds { display: flex; gap: 12px; flex-wrap: wrap; }
+.kinds label { display: inline-flex; gap: 5px; align-items: center; }
+.err { color: var(--bad); font-size: 13px; }
+
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--text); color: var(--window); padding: 9px 16px; border-radius: 10px; font-size: 13px; z-index: 40; box-shadow: var(--shadow); max-width: calc(100vw - 32px); }
+
+@media (max-width: 720px) {
+  .topbar { padding: 12px 16px; flex-wrap: wrap; }
+  .lead { padding: 0 16px; }
+  .window { margin: 0 8px 24px; border-radius: 12px; }
+  .titlebar .title { margin-right: 0; }
+  .check-header, .item, .footer, .pane { padding-left: 14px; padding-right: 14px; }
+  .check-header select { max-width: 100%; flex: 1 1 200px; }
+  .findings { grid-template-columns: 16px minmax(0, 1fr); margin-left: 0; }
+  .findings .exp, .findings .act { grid-column: 2; }
+  .plan, .reason, .fixed-box, .more { margin-left: 0; }
+  .sheet-body { grid-template-columns: 1fr; overflow: auto; }
+  .spec-list { border-right: 0; border-bottom: 1px solid var(--line); max-height: 180px; }
+  .field { grid-template-columns: 1fr; gap: 4px; }
+  .field .hint { grid-column: 1; margin-top: 0; }
+  .segmented button { padding: 5px 10px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="brand-mark" aria-hidden="true">✓</span><span>File Converter · Spec Check</span></div>
+  <span class="demo-badge" data-i18n="demoBadge"></span>
+  <span class="spacer"></span>
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" data-lang="vi">Tiếng Việt</button>
+    <button type="button" data-lang="ko">한국어</button>
+    <button type="button" data-lang="en">English</button>
+  </div>
+</header>
+<p class="lead" data-i18n="lead"></p>
+
+<main class="window" aria-label="File Converter">
+  <div class="titlebar"><div class="dots" aria-hidden="true"><i></i><i></i><i></i></div><div class="title">File Converter</div></div>
+  <nav class="tabs"><div class="segmented" id="tabs" role="tablist"></div></nav>
+  <section id="view"></section>
+</main>
+
+<input type="file" id="file-input" class="sr-only" multiple accept="video/*,image/*,audio/*,.pdf,.mov,.mkv">
+<div id="modal-root"></div>
+<div id="toast-root" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------ i18n */
+const STR = {
+  vi: {
+    demoBadge: "Bản mockup · dữ liệu mẫu",
+    lead: "Mô phỏng ứng dụng macOS File Converter với tính năng mới Spec Check: kiểm tra file trước khi gửi đi, chỉ ra đúng chỗ sai và sửa tự động. Mọi nút đều bấm được; không kết nối server hay AI API thật.",
+    tabCheck: "Kiểm tra spec", tabPresets: "Preset chuyển đổi", tabSettings: "Cài đặt",
+    checkAgainst: "Kiểm tra theo", manage: "Quản lý spec…", fixBy: "Sửa bằng", fitPad: "Thêm viền", fitCrop: "Cắt khung",
+    fitHelp: "Cách sửa sai kích thước/tỉ lệ: thêm viền đen (không mất nội dung) hoặc cắt bớt mép.",
+    emptyTitle: "Kéo thả video hoặc ảnh vào đây",
+    emptyBody: "Mỗi file được đối chiếu với spec đã chọn. Chỗ nào không khớp sẽ được đánh dấu kèm giá trị yêu cầu và giá trị thực tế.",
+    trySamples: "Dùng file mẫu", choose: "Chọn file…",
+    emptyFine: "Bản demo: file thật chỉ được đọc kích thước, thời lượng và dung lượng ngay trong trình duyệt — không tải lên đâu cả. Codec và FPS cần app thật (ffprobe) nên sẽ hiện là \"cần xem\".",
+    checking: "Đang kiểm tra…", meets: "Đạt spec", problems: "{n} lỗi", toReview: "{n} mục cần xem",
+    showAll: "Hiện tất cả {n} quy tắc", hidePass: "Ẩn quy tắc đã đạt", expected: "cần", has: "thực tế",
+    fix: "Sửa", fixWill: "Bản sửa sẽ:", converting: "Đang tạo bản sửa…", showFixed: "Mở file đã sửa",
+    fixedPass: "bản sửa đạt spec", fixedStill: "vẫn còn {n} lỗi", remove: "Bỏ khỏi danh sách",
+    origSafe: "File gốc được giữ nguyên.",
+    countPass: "{n} đạt", countReview: "{n} cần xem", countFail: "{n} lỗi",
+    export: "Xuất báo cáo", exportHtml: "HTML (gửi Slack / email)", exportCsv: "CSV (bảng tính)",
+    clear: "Xóa danh sách", add: "Thêm file…", fixAll: "Sửa tất cả", fixAllN: "Sửa tất cả ({n})",
+    toastFinder: "Đã mở {name} trong Finder (demo)", toastExport: "Đã tải báo cáo {name}", toastFixed: "Đã tạo {name} và kiểm tra lại",
+    toastDup: "File này đã có trong danh sách",
+    rule_mediaKind: "Loại file", rule_fileFormat: "Định dạng", rule_fileSize: "Dung lượng", rule_dimensions: "Kích thước",
+    rule_aspectRatio: "Tỉ lệ khung", rule_duration: "Thời lượng", rule_frameRate: "Tốc độ khung hình",
+    rule_videoCodec: "Codec video", rule_audioCodec: "Codec âm thanh", rule_audioTrack: "Âm thanh",
+    hasAudio: "có âm thanh", noAudio: "không có âm thanh", unknown: "Không đọc được", any: "Bất kỳ", or: "hoặc",
+    kind_video: "video", kind_image: "ảnh", kind_audio: "âm thanh", kind_document: "tài liệu", kind_other: "khác",
+    a_reencode: "Mã hóa lại thành .{ext} ({codec})", a_reencodeSame: "Mã hóa lại ({codec})",
+    a_pad: "Đổi cỡ thành {w} × {h}, thêm viền đen (không mất nội dung)", a_crop: "Đổi cỡ thành {w} × {h}, cắt bớt mép để lấp đầy khung",
+    a_resize: "Đổi cỡ thành {w} × {h}", a_trim: "Cắt còn {s} đầu tiên", a_fps: "Giảm tốc độ khung hình về {fps}",
+    a_silent: "Thêm track âm thanh im lặng", a_mute: "Bỏ track âm thanh", a_bitrate: "Giới hạn bitrate {k} kbps để vừa {mb}",
+    a_convert: "Chuyển sang .{ext}", a_quality: "Giảm chất lượng còn {q} để giảm dung lượng", a_resave: "Lưu lại thành .{ext}",
+    r_tooShort: "Video dài {a} nhưng spec yêu cầu tối thiểu {m}. Cần dựng lại, không chuyển đổi được.",
+    r_wrongKind: "Spec này dành cho {e}, nhưng file này là {a}. Hãy chọn file hoặc spec khác.",
+    r_noFormat: "File Converter không tạo được định dạng nào trong danh sách cho phép ({f}). Hãy xuất từ phần mềm dựng.",
+    r_sizeSmall: "{mb} quá nhỏ cho {s} video với chất lượng xem được. Hãy rút ngắn video hoặc xin giới hạn lớn hơn.",
+    r_unsupported: "Chưa hỗ trợ sửa tự động cho file {k} — hãy sửa thủ công.",
+    // Spec library
+    libTitle: "Quản lý spec", newSpec: "Spec trống", duplicate: "Nhân bản", del: "Xóa", aiDraft: "Soạn từ văn bản bằng AI…",
+    restore: "Khôi phục spec mẫu", done: "Xong", copySuffix: " (bản sao)",
+    f_general: "Chung", f_name: "Tên", f_notes: "Ghi chú", f_for: "Áp dụng cho",
+    f_file: "File", f_formats: "Định dạng cho phép", f_maxSize: "Dung lượng tối đa (MB)",
+    f_frame: "Khung hình", f_width: "Rộng chính xác (px)", f_height: "Cao chính xác (px)", f_ratios: "Tỉ lệ khung cho phép",
+    f_timing: "Thời gian", f_minDur: "Thời lượng tối thiểu (s)", f_maxDur: "Thời lượng tối đa (s)", f_maxFps: "FPS tối đa",
+    f_codecs: "Codec & âm thanh", f_vcodec: "Codec video", f_acodec: "Codec âm thanh", f_audio: "Track âm thanh",
+    aud_optional: "Tùy chọn", aud_required: "Bắt buộc", aud_forbidden: "Phải im lặng",
+    phAny: "Bất kỳ", phFormats: "Bất kỳ (vd: mp4, mov)", phRatios: "Bất kỳ (vd: 9:16, 1:1)", emptyHint: "Để trống = không kiểm tra quy tắc này.",
+    aiBannerTitle: "AI soạn từ văn bản của bạn", aiBannerBody: "Hãy so từng ô với spec gốc trước khi dùng. Ô để trống sẽ không được kiểm tra.", looksRight: "Đã kiểm tra, đúng rồi",
+    // AI import
+    aiTitle: "Soạn spec từ văn bản", aiBody: "Dán yêu cầu bạn nhận được (email, trang hướng dẫn, đoạn trích PDF). Claude chuyển thành checklist; bạn duyệt lại trước khi dùng. Chỉ gửi đoạn văn bản bạn dán — không bao giờ gửi file.",
+    aiPasteExample: "Dán ví dụ", aiDraftBtn: "Soạn spec", aiCancel: "Hủy", aiWorking: "Claude đang đọc yêu cầu…", aiEmpty: "Hãy dán nội dung spec trước.",
+    aiDemoNote: "Demo: kết quả là dữ liệu mẫu, không gọi Claude API thật.",
+    // Presets / settings
+    presetsTitle: "Preset chuyển đổi", presetsBody: "Tính năng gốc của File Converter: chuột phải vào file trong Finder → Quick Actions → \"Convert with File Converter\". Spec Check dùng chính engine này để tạo bản sửa.",
+    settingsTitle: "Cài đặt", sConcurrent: "Số file chuyển đổi cùng lúc", sQuit: "Tự thoát khi chuyển đổi xong", sKey: "Claude API key",
+    sKeyHint: "Không bắt buộc. Chỉ dùng cho \"Soạn từ văn bản bằng AI\". Lưu trong Keychain.", sSave: "Lưu key", sSaved: "Đã lưu",
+    sBackends: "Công cụ chuyển đổi", sAI: "Nhập spec bằng AI", sGeneral: "Chung",
+    reportTitle: "Báo cáo Spec Check", reportFiles: "{n} file",
+  },
+  ko: {
+    demoBadge: "목업 · 샘플 데이터",
+    lead: "macOS 앱 File Converter의 신규 기능 Spec Check를 체험해 보는 목업입니다. 파일을 보내기 전에 스펙과 비교해 틀린 부분만 정확히 짚어 주고, 자동으로 수정합니다. 모든 버튼이 동작하며 실제 서버나 AI API에는 연결하지 않습니다.",
+    tabCheck: "스펙 체크", tabPresets: "변환 프리셋", tabSettings: "설정",
+    checkAgainst: "기준 스펙", manage: "스펙 관리…", fixBy: "수정 방식", fitPad: "여백 추가", fitCrop: "잘라내기",
+    fitHelp: "해상도·비율이 다를 때: 검은 여백을 넣거나(잘리는 부분 없음) 가장자리를 잘라냅니다.",
+    emptyTitle: "영상이나 이미지를 여기로 끌어다 놓으세요",
+    emptyBody: "각 파일을 선택한 스펙과 비교합니다. 맞지 않는 항목은 기준값과 실제값을 함께 표시합니다.",
+    trySamples: "샘플 파일로 체험", choose: "파일 선택…",
+    emptyFine: "데모: 실제 파일은 브라우저 안에서 해상도·길이·용량만 읽으며 어디에도 업로드하지 않습니다. 코덱과 FPS는 실제 앱(ffprobe)에서 읽으므로 여기서는 \"확인 필요\"로 표시됩니다.",
+    checking: "검사 중…", meets: "스펙 충족", problems: "문제 {n}건", toReview: "확인 필요 {n}건",
+    showAll: "규칙 {n}개 모두 보기", hidePass: "통과 항목 숨기기", expected: "기준", has: "실제",
+    fix: "수정", fixWill: "수정 내용:", converting: "수정본 생성 중…", showFixed: "수정본 보기",
+    fixedPass: "수정본이 스펙을 충족합니다", fixedStill: "아직 {n}건 불일치", remove: "목록에서 제거",
+    origSafe: "원본 파일은 변경되지 않습니다.",
+    countPass: "통과 {n}", countReview: "확인 {n}", countFail: "실패 {n}",
+    export: "리포트 내보내기", exportHtml: "HTML (슬랙·메일용)", exportCsv: "CSV (스프레드시트용)",
+    clear: "목록 비우기", add: "파일 추가…", fixAll: "모두 수정", fixAllN: "모두 수정 ({n})",
+    toastFinder: "Finder에서 {name} 열기 (데모)", toastExport: "리포트 {name} 다운로드 완료", toastFixed: "{name} 생성 후 재검사 완료",
+    toastDup: "이미 목록에 있는 파일입니다",
+    rule_mediaKind: "미디어 유형", rule_fileFormat: "파일 형식", rule_fileSize: "파일 용량", rule_dimensions: "해상도",
+    rule_aspectRatio: "화면 비율", rule_duration: "길이", rule_frameRate: "프레임 레이트",
+    rule_videoCodec: "비디오 코덱", rule_audioCodec: "오디오 코덱", rule_audioTrack: "오디오 트랙",
+    hasAudio: "오디오 있음", noAudio: "오디오 없음", unknown: "확인 불가", any: "제한 없음", or: "또는",
+    kind_video: "영상", kind_image: "이미지", kind_audio: "오디오", kind_document: "문서", kind_other: "기타",
+    a_reencode: ".{ext}({codec})로 다시 인코딩", a_reencodeSame: "다시 인코딩({codec})",
+    a_pad: "{w} × {h}로 변환, 검은 여백 추가 (잘리는 부분 없음)", a_crop: "{w} × {h}로 변환, 가장자리를 잘라 화면 채움",
+    a_resize: "{w} × {h}로 크기 변경", a_trim: "앞부분 {s}만 남기고 자르기", a_fps: "프레임 레이트를 {fps}로 낮춤",
+    a_silent: "무음 오디오 트랙 추가", a_mute: "오디오 트랙 제거", a_bitrate: "{mb} 이하가 되도록 비트레이트 {k} kbps로 제한",
+    a_convert: ".{ext}로 변환", a_quality: "용량을 줄이기 위해 품질을 {q}로 낮춤", a_resave: ".{ext}로 다시 저장",
+    r_tooShort: "영상 길이가 {a}인데 스펙은 최소 {m}입니다. 변환이 아니라 재편집이 필요합니다.",
+    r_wrongKind: "이 스펙은 {e}용인데 이 파일은 {a}입니다. 다른 파일이나 스펙을 선택하세요.",
+    r_noFormat: "허용된 형식({f})은 File Converter로 만들 수 없습니다. 편집 툴에서 내보내 주세요.",
+    r_sizeSmall: "{s} 영상을 {mb} 안에 볼 만한 화질로 담기 어렵습니다. 영상을 줄이거나 용량 제한 완화를 요청하세요.",
+    r_unsupported: "{k} 파일은 아직 자동 수정을 지원하지 않습니다. 직접 수정해 주세요.",
+    libTitle: "스펙 관리", newSpec: "빈 스펙", duplicate: "복제", del: "삭제", aiDraft: "AI로 텍스트에서 작성…",
+    restore: "예시 스펙 복원", done: "완료", copySuffix: " (사본)",
+    f_general: "기본", f_name: "이름", f_notes: "메모", f_for: "대상",
+    f_file: "파일", f_formats: "허용 형식", f_maxSize: "최대 용량 (MB)",
+    f_frame: "화면", f_width: "정확한 가로 (px)", f_height: "정확한 세로 (px)", f_ratios: "허용 비율",
+    f_timing: "시간", f_minDur: "최소 길이 (초)", f_maxDur: "최대 길이 (초)", f_maxFps: "최대 FPS",
+    f_codecs: "코덱 · 오디오", f_vcodec: "비디오 코덱", f_acodec: "오디오 코덱", f_audio: "오디오 트랙",
+    aud_optional: "선택", aud_required: "필수", aud_forbidden: "무음이어야 함",
+    phAny: "제한 없음", phFormats: "제한 없음 (예: mp4, mov)", phRatios: "제한 없음 (예: 9:16, 1:1)", emptyHint: "비워 두면 해당 규칙은 검사하지 않습니다.",
+    aiBannerTitle: "AI가 텍스트로 작성한 초안", aiBannerBody: "사용 전에 원문 스펙과 항목별로 비교해 주세요. 빈 칸은 검사하지 않습니다.", looksRight: "확인 완료",
+    aiTitle: "텍스트로 스펙 작성", aiBody: "전달받은 요구사항(메일, 가이드 페이지, PDF 일부)을 붙여 넣으세요. Claude가 체크리스트로 바꾸고, 사용 전에 직접 검토합니다. 붙여 넣은 텍스트만 전송되며 파일은 절대 전송되지 않습니다.",
+    aiPasteExample: "예시 붙여넣기", aiDraftBtn: "스펙 작성", aiCancel: "취소", aiWorking: "Claude가 요구사항을 읽는 중…", aiEmpty: "먼저 스펙 내용을 붙여 넣으세요.",
+    aiDemoNote: "데모: 결과는 샘플 데이터이며 실제 Claude API를 호출하지 않습니다.",
+    presetsTitle: "변환 프리셋", presetsBody: "File Converter의 기존 기능: Finder에서 파일 우클릭 → 빠른 동작 → \"Convert with File Converter\". Spec Check는 이 변환 엔진으로 수정본을 만듭니다.",
+    settingsTitle: "설정", sConcurrent: "동시 변환 수", sQuit: "변환이 끝나면 자동 종료", sKey: "Claude API 키",
+    sKeyHint: "선택 사항. \"AI로 텍스트에서 작성\"에만 사용하며 키체인에 저장됩니다.", sSave: "키 저장", sSaved: "저장됨",
+    sBackends: "변환 도구", sAI: "AI 스펙 가져오기", sGeneral: "일반",
+    reportTitle: "Spec Check 리포트", reportFiles: "파일 {n}개",
+  },
+  en: {
+    demoBadge: "Mockup · sample data",
+    lead: "A clickable mockup of the File Converter macOS app's new Spec Check feature: check files before you send them, see exactly what's wrong, and fix it automatically. Every button works; nothing talks to a real server or AI API.",
+    tabCheck: "Spec Check", tabPresets: "Presets", tabSettings: "Settings",
+    checkAgainst: "Check against", manage: "Manage specs…", fixBy: "Fix by", fitPad: "Adding bars", fitCrop: "Cropping",
+    fitHelp: "How to fix a wrong size or ratio: add black bars (nothing is cut off) or crop the edges.",
+    emptyTitle: "Drop videos or images here",
+    emptyBody: "Each file is checked against the selected spec. Anything that doesn't match is flagged with what was expected and what the file has.",
+    trySamples: "Try sample files", choose: "Choose files…",
+    emptyFine: "Demo: real files are read only for dimensions, length and size, right in your browser — nothing is uploaded. Codec and FPS need the real app (ffprobe), so they show as \"to review\" here.",
+    checking: "Checking…", meets: "Meets the spec", problems: "{n} problem(s)", toReview: "{n} to review",
+    showAll: "Show all {n} rules", hidePass: "Hide passing rules", expected: "expected", has: "has",
+    fix: "Fix", fixWill: "Fix will:", converting: "Converting a fixed copy…", showFixed: "Show fixed file",
+    fixedPass: "fixed copy meets the spec", fixedStill: "still fails {n} rule(s)", remove: "Remove from list",
+    origSafe: "The original file is never changed.",
+    countPass: "{n} pass", countReview: "{n} to review", countFail: "{n} fail",
+    export: "Export report", exportHtml: "HTML (for Slack / email)", exportCsv: "CSV (for spreadsheets)",
+    clear: "Clear", add: "Add files…", fixAll: "Fix all", fixAllN: "Fix all ({n})",
+    toastFinder: "Revealed {name} in Finder (demo)", toastExport: "Downloaded {name}", toastFixed: "Created {name} and re-checked it",
+    toastDup: "That file is already in the list",
+    rule_mediaKind: "Media type", rule_fileFormat: "File format", rule_fileSize: "File size", rule_dimensions: "Dimensions",
+    rule_aspectRatio: "Aspect ratio", rule_duration: "Duration", rule_frameRate: "Frame rate",
+    rule_videoCodec: "Video codec", rule_audioCodec: "Audio codec", rule_audioTrack: "Audio track",
+    hasAudio: "an audio track", noAudio: "no audio track", unknown: "Unknown", any: "Any", or: "or",
+    kind_video: "video", kind_image: "image", kind_audio: "audio", kind_document: "document", kind_other: "other",
+    a_reencode: "Re-encode as .{ext} ({codec})", a_reencodeSame: "Re-encode ({codec})",
+    a_pad: "Resize to {w} × {h}, adding black bars (nothing is cut off)", a_crop: "Resize to {w} × {h}, cropping the edges to fill the frame",
+    a_resize: "Resize to {w} × {h}", a_trim: "Trim to the first {s}", a_fps: "Lower frame rate to {fps}",
+    a_silent: "Add a silent audio track", a_mute: "Remove the audio track", a_bitrate: "Cap bitrate at {k} kbps to fit {mb}",
+    a_convert: "Convert to .{ext}", a_quality: "Lower quality to {q} to reduce size", a_resave: "Re-save as .{ext}",
+    r_tooShort: "The video is {a} but the spec needs at least {m}. That needs a re-edit, not a conversion.",
+    r_wrongKind: "This spec is for {e} files, but this is {a}. Pick another file or spec.",
+    r_noFormat: "File Converter can't produce any of the allowed formats ({f}). Export from your editor instead.",
+    r_sizeSmall: "{mb} is too small for {s} of video at watchable quality. Shorten it or ask for a higher limit.",
+    r_unsupported: "Automatic fixes aren't available for {k} files yet — fix it manually.",
+    libTitle: "Manage specs", newSpec: "Blank spec", duplicate: "Duplicate", del: "Delete", aiDraft: "Draft from text with AI…",
+    restore: "Restore example specs", done: "Done", copySuffix: " copy",
+    f_general: "General", f_name: "Name", f_notes: "Notes", f_for: "For",
+    f_file: "File", f_formats: "Allowed formats", f_maxSize: "Max file size (MB)",
+    f_frame: "Frame", f_width: "Exact width (px)", f_height: "Exact height (px)", f_ratios: "Aspect ratios",
+    f_timing: "Timing", f_minDur: "Min duration (s)", f_maxDur: "Max duration (s)", f_maxFps: "Max frame rate",
+    f_codecs: "Codecs & audio", f_vcodec: "Video codecs", f_acodec: "Audio codecs", f_audio: "Audio track",
+    aud_optional: "Optional", aud_required: "Required", aud_forbidden: "Must be silent",
+    phAny: "Any", phFormats: "Any (e.g. mp4, mov)", phRatios: "Any (e.g. 9:16, 1:1)", emptyHint: "Leave empty = this rule isn't checked.",
+    aiBannerTitle: "Drafted by AI from your text", aiBannerBody: "Compare each field with the original spec before using it. Empty fields aren't checked.", looksRight: "Looks right",
+    aiTitle: "Draft a spec from text", aiBody: "Paste the requirements you were sent (email, help-center page, PDF excerpt). Claude turns them into a checklist; you review it before it's used. Only the text you paste is sent — never your files.",
+    aiPasteExample: "Paste example", aiDraftBtn: "Draft spec", aiCancel: "Cancel", aiWorking: "Claude is reading the requirements…", aiEmpty: "Paste the spec text first.",
+    aiDemoNote: "Demo: the result is sample data; the real Claude API is not called.",
+    presetsTitle: "Conversion presets", presetsBody: "File Converter's original feature: right-click a file in Finder → Quick Actions → \"Convert with File Converter\". Spec Check uses this same engine to produce fixed copies.",
+    settingsTitle: "Settings", sConcurrent: "Simultaneous conversions", sQuit: "Quit automatically when conversions finish", sKey: "Claude API key",
+    sKeyHint: "Optional. Used only for \"Draft from text with AI\". Stored in your Keychain.", sSave: "Save key", sSaved: "Saved",
+    sBackends: "Backends", sAI: "AI spec import", sGeneral: "General",
+    reportTitle: "Spec Check report", reportFiles: "{n} file(s)",
+  }
+};
+
+let lang = (() => {
+  try { const saved = localStorage.getItem("speccheck-lang"); if (saved && STR[saved]) return saved; } catch (e) {}
+  const nav = (navigator.language || "vi").slice(0, 2);
+  return STR[nav] ? nav : "vi";
+})();
+
+function t(key, params) {
+  let s = (STR[lang] && STR[lang][key]) ?? STR.en[key] ?? key;
+  if (params) for (const k in params) s = s.split("{" + k + "}").join(params[k]);
+  return s;
+}
+const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* ------------------------------------------------------------------ formatting (mirrors SpecFormat) */
+function num(v, d = 2) { const f = Math.pow(10, d); const r = Math.round(v * f) / f; return Number.isInteger(r) ? String(r) : String(r); }
+const fmtS = (v) => num(v, 1) + " s";
+const fmtMB = (v) => num(v, 2) + " MB";
+const fmtFps = (v) => num(v, 2) + " fps";
+function ratioText(w, h) {
+  const g = (a, b) => (b ? g(b, a % b) : a); const d = Math.max(1, g(w, h)); const rw = w / d, rh = h / d;
+  return rw <= 32 && rh <= 32 ? rw + ":" + rh : num(w / h) + ":1";
+}
+
+/* ------------------------------------------------------------------ data */
+const L = (vi, ko, en) => ({ vi, ko, en });
+const DEFAULT_SPECS = [
+  { id: "s1", builtIn: true, name: L("Video quảng cáo dọc (9:16)", "세로형 영상 광고 (9:16)", "Vertical video ad (9:16)"),
+    notes: L("Spec mẫu — hãy đối chiếu yêu cầu hiện tại của mạng quảng cáo.", "예시 스펙 — 광고 네트워크의 최신 요구사항을 확인하세요.", "Example spec — check your ad network's current requirements."),
+    kinds: ["video"], exts: ["mp4", "mov"], maxMB: 30, width: 1080, height: 1920, ratios: ["9:16"], minDur: 5, maxDur: 60, maxFps: 60, vcodecs: ["h264"], acodecs: ["aac"], audio: "required" },
+  { id: "s2", builtIn: true, name: L("Video quảng cáo ngang (16:9)", "가로형 영상 광고 (16:9)", "Landscape video ad (16:9)"),
+    notes: L("Spec mẫu — hãy đối chiếu yêu cầu hiện tại của mạng quảng cáo.", "예시 스펙 — 광고 네트워크의 최신 요구사항을 확인하세요.", "Example spec — check your ad network's current requirements."),
+    kinds: ["video"], exts: ["mp4", "mov"], maxMB: 50, width: 1920, height: 1080, ratios: ["16:9"], minDur: 5, maxDur: 60, maxFps: 60, vcodecs: ["h264"], acodecs: ["aac"], audio: "required" },
+  { id: "s3", builtIn: true, name: L("Video quảng cáo vuông (1:1)", "정사각형 영상 광고 (1:1)", "Square video ad (1:1)"),
+    notes: L("Spec mẫu — hãy đối chiếu yêu cầu hiện tại của mạng quảng cáo.", "예시 스펙 — 광고 네트워크의 최신 요구사항을 확인하세요.", "Example spec — check your ad network's current requirements."),
+    kinds: ["video"], exts: ["mp4"], maxMB: 30, width: 1080, height: 1080, ratios: ["1:1"], minDur: 5, maxDur: 30, maxFps: 60, vcodecs: ["h264"], acodecs: null, audio: "optional" },
+  { id: "s4", builtIn: true, name: L("Ảnh chụp màn hình store (dọc 1290×2796)", "스토어 스크린샷 (세로 1290×2796)", "Store screenshot (portrait 1290×2796)"),
+    notes: L("Ví dụ: cỡ ảnh cho điện thoại 6.7 inch. Store chấp nhận nhiều cỡ — hãy nhân bản và chỉnh.", "예: 6.7인치 폰 스크린샷 크기. 스토어별로 여러 크기가 있으니 복제해서 수정하세요.", "Example: a 6.7\" phone screenshot size. Stores accept several sizes — duplicate and adjust."),
+    kinds: ["image"], exts: ["png", "jpg"], maxMB: 8, width: 1290, height: 2796, ratios: null, minDur: null, maxDur: null, maxFps: null, vcodecs: null, acodecs: null, audio: "optional" },
+  { id: "s5", builtIn: true, name: L("File đính kèm chat / email (≤ 25 MB)", "메신저·메일 첨부 (≤ 25 MB)", "Chat / email attachment (≤ 25 MB)"),
+    notes: L("Mọi loại file; chỉ kiểm tra dung lượng.", "모든 파일 형식, 용량만 검사합니다.", "Any file type; only the size matters."),
+    kinds: [], exts: null, maxMB: 25, width: null, height: null, ratios: null, minDur: null, maxDur: null, maxFps: null, vcodecs: null, acodecs: null, audio: "optional" },
+];
+
+const SAMPLE_FILES = [
+  { name: "launch_trailer_16x9.mp4", kind: "video", sizeMB: 42.6, w: 1920, h: 1080, dur: 30, fps: 60, vcodec: "h264", acodec: "aac", audio: true },
+  { name: "gameplay_vertical.mov", kind: "video", sizeMB: 18.2, w: 1080, h: 1920, dur: 45, fps: 30, vcodec: "hevc", acodec: null, audio: false },
+  { name: "ugc_ad_final_v3.mp4", kind: "video", sizeMB: 12.4, w: 1080, h: 1920, dur: 28, fps: 30, vcodec: "h264", acodec: "aac", audio: true },
+  { name: "teaser_cut.mp4", kind: "video", sizeMB: 2.1, w: 1080, h: 1920, dur: 3.5, fps: 30, vcodec: "h264", acodec: "aac", audio: true },
+];
+
+const AI_EXAMPLE = `Rewarded video — creative requirements (portrait placement)
+
+• File: MP4 container, H.264 video, AAC audio. Sound must be on.
+• Resolution: 1080 x 1920 (9:16). Other sizes are rejected.
+• Length: 15–30 seconds.
+• Max frame rate 30 fps.
+• Max file size: 20MB.
+Landscape placements also accept 1920 x 1080 (16:9) — submit those separately.`;
+
+const AI_DRAFT = () => ({ id: "ai" + Date.now(), builtIn: false, ai: true,
+  name: "Rewarded video — portrait (9:16)",
+  notes: lang === "vi" ? "Vị trí ngang nhận 1920×1080 (16:9), nộp riêng." : lang === "ko" ? "가로형 지면은 1920×1080(16:9)도 허용, 별도 제출." : "Landscape placements also accept 1920×1080 (16:9), submitted separately.",
+  kinds: ["video"], exts: ["mp4"], maxMB: 20, width: 1080, height: 1920, ratios: ["9:16"], minDur: 15, maxDur: 30, maxFps: 30, vcodecs: ["h264"], acodecs: ["aac"], audio: "required" });
+
+/* ------------------------------------------------------------------ state */
+const state = {
+  tab: "check",
+  specs: JSON.parse(JSON.stringify(DEFAULT_SPECS)),
+  specId: "s1",
+  fit: "pad",
+  items: [],
+  showAll: {},
+  menuOpen: false,
+  modal: null,       // "library" | "ai"
+  libSel: null,
+  aiText: "", aiWorking: false, aiError: "",
+  settings: { concurrent: 4, quit: true, key: "", saved: false },
+};
+let uid = 0;
+
+const specName = (s) => (typeof s.name === "string" ? s.name : s.name[lang] || s.name.en);
+const specNotes = (s) => (s.notes == null ? "" : typeof s.notes === "string" ? s.notes : s.notes[lang] || s.notes.en);
+const currentSpec = () => state.specs.find((s) => s.id === state.specId) || state.specs[0];
+function specSummary(s) {
+  const p = [];
+  if (s.width && s.height) p.push(s.width + "×" + s.height);
+  if (s.ratios && s.ratios.length) p.push(s.ratios.join(" / "));
+  if (s.maxDur != null) p.push("≤ " + fmtS(s.maxDur));
+  if (s.maxMB != null) p.push("≤ " + fmtMB(s.maxMB));
+  if (s.exts && s.exts.length) p.push(s.exts.join("/"));
+  return p.length ? p.join(" · ") : "—";
+}
+
+/* ------------------------------------------------------------------ checker (port of SpecChecker.swift) */
+function ratioValue(r) { const [a, b] = r.split(":").map(Number); return a / b; }
+function check(info, spec) {
+  const F = [];
+  const push = (rule, status, expected, actual) => F.push({ rule, status, expected, actual });
+  if (spec.kinds && spec.kinds.length) {
+    const ok = spec.kinds.includes(info.kind);
+    push("mediaKind", ok ? "pass" : "fail", spec.kinds.map((k) => t("kind_" + k)).join(" " + t("or") + " "), t("kind_" + info.kind));
+    if (!ok) return F;
+  }
+  if (spec.exts && spec.exts.length) {
+    const ext = normExt(info.name.split(".").pop());
+    push("fileFormat", spec.exts.includes(ext) ? "pass" : "fail", spec.exts.map((e) => "." + e).join(", "), "." + ext);
+  }
+  if (spec.maxMB != null) push("fileSize", info.sizeMB <= spec.maxMB ? "pass" : "fail", "≤ " + fmtMB(spec.maxMB), fmtMB(info.sizeMB));
+  const visual = info.kind === "video" || info.kind === "image";
+  if (visual && (spec.width || spec.height)) {
+    const exp = (spec.width || t("any")) + " × " + (spec.height || t("any"));
+    if (info.w == null) push("dimensions", "warning", exp, t("unknown"));
+    else push("dimensions", (!spec.width || spec.width === info.w) && (!spec.height || spec.height === info.h) ? "pass" : "fail", exp, info.w + " × " + info.h);
+  }
+  if (visual && spec.ratios && spec.ratios.length) {
+    const exp = spec.ratios.join(" " + t("or") + " ");
+    if (info.w == null) push("aspectRatio", "warning", exp, t("unknown"));
+    else { const v = info.w / info.h; push("aspectRatio", spec.ratios.some((r) => Math.abs(v - ratioValue(r)) <= ratioValue(r) * 0.01) ? "pass" : "fail", exp, ratioText(info.w, info.h)); }
+  }
+  const timed = info.kind === "video" || info.kind === "audio";
+  if (timed && (spec.minDur != null || spec.maxDur != null)) {
+    const exp = spec.minDur != null && spec.maxDur != null ? fmtS(spec.minDur) + " – " + fmtS(spec.maxDur) : spec.minDur != null ? "≥ " + fmtS(spec.minDur) : "≤ " + fmtS(spec.maxDur);
+    if (info.dur == null) push("duration", "warning", exp, t("unknown"));
+    else push("duration", (spec.minDur == null || info.dur >= spec.minDur) && (spec.maxDur == null || info.dur <= spec.maxDur) ? "pass" : "fail", exp, fmtS(info.dur));
+  }
+  if (info.kind === "video" && spec.maxFps != null) {
+    if (info.fps == null) push("frameRate", "warning", "≤ " + fmtFps(spec.maxFps), t("unknown"));
+    else push("frameRate", info.fps <= spec.maxFps + 0.05 ? "pass" : "fail", "≤ " + fmtFps(spec.maxFps), fmtFps(info.fps));
+  }
+  if (info.kind === "video" && spec.vcodecs && spec.vcodecs.length) {
+    if (!info.vcodec) push("videoCodec", "warning", spec.vcodecs.join(", "), t("unknown"));
+    else push("videoCodec", spec.vcodecs.includes(info.vcodec) ? "pass" : "fail", spec.vcodecs.join(", "), info.vcodec);
+  }
+  if (timed) {
+    if (spec.audio !== "optional") {
+      if (info.audio == null) push("audioTrack", "warning", spec.audio === "required" ? t("hasAudio") : t("noAudio"), t("unknown"));
+      else if (spec.audio === "required") push("audioTrack", info.audio ? "pass" : "fail", t("hasAudio"), info.audio ? t("hasAudio") : t("noAudio"));
+      else push("audioTrack", info.audio ? "fail" : "pass", t("noAudio"), info.audio ? t("hasAudio") : t("noAudio"));
+    }
+    if (info.audio && spec.acodecs && spec.acodecs.length) {
+      if (!info.acodec) push("audioCodec", "warning", spec.acodecs.join(", "), t("unknown"));
+      else push("audioCodec", spec.acodecs.includes(info.acodec) ? "pass" : "fail", spec.acodecs.join(", "), info.acodec);
+    }
+  }
+  return F;
+}
+const worst = (F) => (F.some((f) => f.status === "fail") ? "fail" : F.some((f) => f.status === "warning") ? "warning" : "pass");
+function normExt(e) { e = String(e || "").trim().toLowerCase().replace(/^\./, ""); return e === "jpeg" ? "jpg" : e; }
+
+/* ------------------------------------------------------------------ fix planner (port of SpecFixPlanner.swift) */
+function plan(info, spec, findings) {
+  const failed = new Set(findings.filter((f) => f.status === "fail").map((f) => f.rule));
+  if (!failed.size) return null;
+  if (failed.has("mediaKind")) return { error: t("r_wrongKind", { e: spec.kinds.map((k) => t("kind_" + k)).join("/"), a: t("kind_" + info.kind) }) };
+  if (info.kind === "video") return planVideo(info, spec, failed);
+  if (info.kind === "image") return planImage(info, spec, failed);
+  return { error: t("r_unsupported", { k: t("kind_" + info.kind) }) };
+}
+function targetSize(info, spec, even) {
+  const fin = (w, h) => { w = Math.max(1, Math.round(w)); h = Math.max(1, Math.round(h)); if (even) { w -= w % 2; h -= h % 2; } return { w, h }; };
+  if (spec.width && spec.height) return fin(spec.width, spec.height);
+  const src = info.w / info.h, rs = spec.ratios || [];
+  const allowed = !rs.length || rs.some((r) => Math.abs(src - ratioValue(r)) <= ratioValue(r) * 0.01);
+  const r = allowed ? src : ratioValue(rs[0]);
+  let w = info.w, h = info.h;
+  if (!allowed) { if ((src > r) === (state.fit === "pad")) h = w / r; else w = h * r; }
+  return fin(w, h);
+}
+function planVideo(info, spec, failed) {
+  if (failed.has("duration") && spec.minDur != null && info.dur < spec.minDur) return { error: t("r_tooShort", { a: fmtS(info.dur), m: fmtS(spec.minDur) }) };
+  const exts = spec.exts || [];
+  if (exts.length && !exts.includes("mp4")) return { error: t("r_noFormat", { f: exts.join(", ") }) };
+  const actions = [], out = { ext: "mp4", vcodec: "h264", acodec: "aac" };
+  const srcExt = normExt(info.name.split(".").pop());
+  actions.push(srcExt !== "mp4" || info.vcodec !== "h264" ? t("a_reencode", { ext: "mp4", codec: "H264" }) : t("a_reencodeSame", { codec: "H264" }));
+  let size = { w: info.w, h: info.h };
+  if (failed.has("dimensions") || failed.has("aspectRatio")) {
+    size = targetSize(info, spec, true);
+    const ratioChanges = Math.abs(info.w / info.h - size.w / size.h) > (size.w / size.h) * 0.01;
+    actions.push(ratioChanges ? t(state.fit === "pad" ? "a_pad" : "a_crop", size) : t("a_resize", size));
+  }
+  let dur = info.dur;
+  if (failed.has("duration") && spec.maxDur != null) { dur = Math.min(dur, spec.maxDur); actions.push(t("a_trim", { s: fmtS(spec.maxDur) })); }
+  let fps = info.fps;
+  if (failed.has("frameRate") && spec.maxFps != null) { fps = spec.maxFps; actions.push(t("a_fps", { fps: fmtFps(spec.maxFps) })); }
+  let audio = info.audio;
+  if (spec.audio === "required" && !info.audio) { audio = true; actions.push(t("a_silent")); }
+  if (spec.audio === "forbidden" && info.audio) { audio = false; actions.push(t("a_mute")); }
+  let sizeMB = Math.min(info.sizeMB, info.sizeMB * (dur / info.dur) * 0.8);
+  if (spec.maxMB != null && dur) {
+    const total = spec.maxMB * 8000 * 0.9 / dur;
+    let a = audio ? 128 : 0;
+    if (audio && total - a < 300) a = 64;
+    const v = Math.floor(total) - a;
+    if (v < 150) return { error: t("r_sizeSmall", { mb: fmtMB(spec.maxMB), s: fmtS(dur) }) };
+    if (failed.has("fileSize")) actions.push(t("a_bitrate", { k: v, mb: fmtMB(spec.maxMB) }));
+    sizeMB = Math.min(sizeMB, spec.maxMB * 0.86);
+  }
+  const fixed = { ...info, name: info.name.replace(/\.[^.]+$/, "") + "_fixed.mp4", w: size.w, h: size.h, dur, fps, audio, vcodec: "h264", acodec: audio ? "aac" : null, sizeMB: Math.round(sizeMB * 10) / 10, real: false };
+  return { actions, fixed };
+}
+function planImage(info, spec, failed) {
+  const exts = spec.exts || [];
+  const ok = (e) => !exts.length || exts.includes(e);
+  const src = normExt(info.name.split(".").pop());
+  let ext = ["png", "jpg", "webp", "avif"].includes(src) && ok(src) ? src : ["png", "jpg", "webp", "avif"].find(ok);
+  if (!ext) return { error: t("r_noFormat", { f: exts.join(", ") }) };
+  if (failed.has("fileSize") && ext === "png" && ok("jpg")) ext = "jpg";
+  const actions = []; let size = { w: info.w, h: info.h };
+  if (ext !== src) actions.push(t("a_convert", { ext }));
+  if (failed.has("dimensions") || failed.has("aspectRatio")) { size = targetSize(info, spec, false); actions.push(t(state.fit === "pad" ? "a_pad" : "a_crop", size)); }
+  let sizeMB = info.sizeMB;
+  if (failed.has("fileSize")) { actions.push(t("a_quality", { q: 80 })); sizeMB = Math.min(sizeMB * 0.35, (spec.maxMB || sizeMB) * 0.7); }
+  if (!actions.length) actions.push(t("a_resave", { ext }));
+  return { actions, fixed: { ...info, name: info.name.replace(/\.[^.]+$/, "") + "_fixed." + ext, w: size.w, h: size.h, sizeMB: Math.round(sizeMB * 10) / 10 } };
+}
+
+/* ------------------------------------------------------------------ items */
+function addInfos(infos) {
+  let dup = false;
+  for (const info of infos) {
+    if (state.items.some((i) => i.info.name === info.name && i.info.sizeMB === info.sizeMB)) { dup = true; continue; }
+    const item = { id: ++uid, info, checking: true, fix: { state: "idle" } };
+    state.items.push(item);
+    setTimeout(() => { item.checking = false; render(); }, 350 + Math.random() * 500);
+  }
+  if (dup) toast(t("toastDup"));
+  render();
+}
+function addSamples() { addInfos(SAMPLE_FILES.map((f) => ({ ...f }))); }
+
+function readRealFile(file) {
+  return new Promise((resolve) => {
+    const ext = normExt(file.name.split(".").pop());
+    const type = file.type || "";
+    const kind = type.startsWith("video/") || ["mp4", "mov", "mkv", "webm", "avi", "m4v"].includes(ext) ? "video"
+      : type.startsWith("image/") || ["png", "jpg", "webp", "heic", "gif", "avif", "tif", "tiff", "bmp"].includes(ext) ? "image"
+      : type.startsWith("audio/") ? "audio" : ext === "pdf" ? "document" : "other";
+    const base = { name: file.name, kind, sizeMB: Math.round(file.size / 10000) / 100, w: null, h: null, dur: null, fps: null, vcodec: null, acodec: null, audio: null, real: true };
+    const url = URL.createObjectURL(file);
+    const done = (extra) => { URL.revokeObjectURL(url); resolve({ ...base, ...extra }); };
+    if (kind === "image") { const img = new Image(); img.onload = () => done({ w: img.naturalWidth, h: img.naturalHeight }); img.onerror = () => done({}); img.src = url; }
+    else if (kind === "video" || kind === "audio") {
+      const el = document.createElement(kind === "video" ? "video" : "audio"); el.preload = "metadata"; el.muted = true;
+      el.onloadedmetadata = () => done(kind === "video" ? { w: el.videoWidth || null, h: el.videoHeight || null, dur: isFinite(el.duration) ? Math.round(el.duration * 10) / 10 : null } : { dur: isFinite(el.duration) ? Math.round(el.duration * 10) / 10 : null });
+      el.onerror = () => done({}); el.src = url;
+      setTimeout(() => done({}), 4000);
+    } else done({});
+  });
+}
+async function addRealFiles(files) {
+  if (!files || !files.length) return;
+  const infos = await Promise.all([...files].map(readRealFile));
+  addInfos(infos);
+}
+
+function runFix(item) {
+  const spec = currentSpec();
+  const F = check(item.info, spec);
+  const p = plan(item.info, spec, F);
+  if (!p || p.error) return;
+  item.fix = { state: "fixing", progress: 0 };
+  render();
+  const started = performance.now(), total = 1400 + Math.random() * 1200;
+  const tick = () => {
+    const pr = Math.min(1, (performance.now() - started) / total);
+    item.fix.progress = pr;
+    const bar = document.querySelector('[data-progress="' + item.id + '"]');
+    if (bar) bar.style.width = Math.round(pr * 100) + "%";
+    if (pr < 1) requestAnimationFrame(tick);
+    else { item.fix = { state: "fixed", info: p.fixed }; render(); toast(t("toastFixed", { name: p.fixed.name })); }
+  };
+  requestAnimationFrame(tick);
+}
+
+/** Switching spec invalidates fixes planned for the old one (same as recheckAll in the app). */
+function selectSpec(id) {
+  if (state.specId === id) return;
+  state.specId = id;
+  state.items.forEach((i) => { if (i.fix.state !== "fixing") i.fix = { state: "idle" }; });
+}
+
+function itemFindings(item) { return check(item.info, currentSpec()); }
+function effectiveStatus(item) {
+  if (item.checking) return null;
+  if (item.fix.state === "fixed") return worst(check(item.fix.info, currentSpec()));
+  return worst(itemFindings(item));
+}
+function fixable(item) {
+  if (item.checking || item.fix.state !== "idle") return false;
+  const F = itemFindings(item); if (worst(F) !== "fail") return false;
+  const p = plan(item.info, currentSpec(), F); return !!(p && !p.error);
+}
+
+/* ------------------------------------------------------------------ rendering */
+const view = document.getElementById("view");
+const statusDot = (s, small) => s ? '<span class="status ' + s + (small ? " small" : "") + '" aria-label="' + s + '">' + (s === "pass" ? "✓" : s === "warning" ? "!" : "✕") + "</span>" : '<span class="status checking' + (small ? " small" : "") + '"></span>';
+
+function render() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  const tabs = [["check", "tabCheck"], ["presets", "tabPresets"], ["settings", "tabSettings"]];
+  document.getElementById("tabs").innerHTML = tabs.map(([id, k]) => '<button type="button" role="tab" data-tab="' + id + '" aria-pressed="' + (state.tab === id) + '">' + esc(t(k)) + "</button>").join("");
+  view.innerHTML = state.tab === "check" ? renderCheck() : state.tab === "presets" ? renderPresets() : renderSettings();
+  renderModal();
+}
+
+function renderCheck() {
+  const spec = currentSpec();
+  let h = '<div class="check-header"><div class="row">';
+  h += '<label for="spec-select">' + esc(t("checkAgainst")) + '</label><select id="spec-select">' + state.specs.map((s) => '<option value="' + s.id + '"' + (s.id === spec.id ? " selected" : "") + ">" + esc(specName(s)) + "</option>").join("") + "</select>";
+  h += '<button type="button" class="btn" data-act="library">' + esc(t("manage")) + "</button><span class=\"spacer\"></span>";
+  h += '<label>' + esc(t("fixBy")) + '</label><div class="segmented" title="' + esc(t("fitHelp")) + '"><button type="button" data-fit="pad" aria-pressed="' + (state.fit === "pad") + '">' + esc(t("fitPad")) + '</button><button type="button" data-fit="crop" aria-pressed="' + (state.fit === "crop") + '">' + esc(t("fitCrop")) + "</button></div>";
+  h += '</div><div class="summary">' + esc(specSummary(spec)) + "</div>";
+  if (specNotes(spec)) h += '<div class="notes">' + esc(specNotes(spec)) + "</div>";
+  h += "</div>";
+
+  h += '<div class="content" id="dropzone">';
+  if (!state.items.length) {
+    h += '<div class="empty"><div><div class="icon" aria-hidden="true">📋</div><h2>' + esc(t("emptyTitle")) + "</h2><p>" + esc(t("emptyBody")) + '</p><div class="actions"><button type="button" class="btn primary large" data-act="samples">' + esc(t("trySamples")) + '</button><button type="button" class="btn large" data-act="choose">' + esc(t("choose")) + '</button></div><p class="fine">' + esc(t("emptyFine")) + "</p></div></div>";
+  } else {
+    h += '<ul class="list">' + state.items.map(renderItem).join("") + "</ul>";
+  }
+  h += "</div>";
+
+  // footer
+  const c = { pass: 0, warning: 0, fail: 0 };
+  state.items.forEach((i) => { const s = effectiveStatus(i); if (s) c[s]++; });
+  const nFix = state.items.filter(fixable).length;
+  h += '<div class="footer">';
+  if (state.items.length) {
+    h += '<span class="count pass">✓ ' + esc(t("countPass", { n: c.pass })) + "</span>";
+    if (c.warning) h += '<span class="count warning">! ' + esc(t("countReview", { n: c.warning })) + "</span>";
+    h += '<span class="count ' + (c.fail ? "fail" : "zero") + '">✕ ' + esc(t("countFail", { n: c.fail })) + "</span>";
+  }
+  h += '<span class="spacer"></span>';
+  if (state.items.length) {
+    h += '<div class="menu"><button type="button" class="btn" data-act="menu" aria-expanded="' + state.menuOpen + '">' + esc(t("export")) + " ▾</button>";
+    if (state.menuOpen) h += '<div class="menu-pop"><button type="button" data-act="export-html">' + esc(t("exportHtml")) + '</button><button type="button" data-act="export-csv">' + esc(t("exportCsv")) + "</button></div>";
+    h += "</div>";
+    h += '<button type="button" class="btn" data-act="clear"' + (state.items.some((i) => i.fix.state === "fixing") ? " disabled" : "") + ">" + esc(t("clear")) + "</button>";
+  }
+  h += '<button type="button" class="btn" data-act="choose">' + esc(t("add")) + "</button>";
+  h += '<button type="button" class="btn primary" data-act="fixall"' + (nFix ? "" : " disabled") + ">" + esc(nFix ? t("fixAllN", { n: nFix }) : t("fixAll")) + "</button>";
+  h += "</div>";
+  return h;
+}
+
+function findingsGrid(F) {
+  return '<div class="findings">' + F.map((f) => statusDot(f.status, true) + '<span class="rule">' + esc(t("rule_" + f.rule)) + '</span><span class="exp">' + esc(t("expected")) + " " + esc(f.expected) + '</span><span class="act ' + f.status + '">' + esc(t("has")) + " " + esc(f.actual) + "</span>").join("") + "</div>";
+}
+
+function renderItem(item) {
+  const spec = currentSpec();
+  const info = item.info;
+  let h = '<li class="item">';
+  if (item.checking) {
+    h += '<div class="item-head">' + statusDot(null) + '<div class="item-main"><div class="item-name">' + esc(info.name) + '</div><div class="item-sub">' + esc(t("checking")) + "</div></div></div></li>";
+    return h;
+  }
+  const F = check(info, spec), st = worst(F);
+  const fails = F.filter((f) => f.status === "fail").length, warns = F.filter((f) => f.status === "warning").length;
+  const sub = [st === "pass" ? t("meets") : st === "warning" ? t("toReview", { n: warns }) : t("problems", { n: fails })];
+  if (info.w) sub.push(info.w + "×" + info.h);
+  if (info.dur != null) sub.push(fmtS(info.dur));
+  if (info.fps != null) sub.push(fmtFps(info.fps));
+  sub.push(fmtMB(info.sizeMB));
+  const p = st === "fail" ? plan(info, spec, F) : null;
+
+  h += '<div class="item-head">' + statusDot(st) + '<div class="item-main"><div class="item-name" title="' + esc(info.name) + '">' + esc(info.name) + '</div><div class="item-sub">' + esc(sub.join(" · ")) + "</div></div>";
+  if (st === "fail") {
+    if (item.fix.state === "idle") h += '<button type="button" class="btn primary" data-fix="' + item.id + '"' + (p && !p.error ? "" : " disabled") + ">" + esc(t("fix")) + "</button>";
+    else if (item.fix.state === "fixing") h += '<div class="progress" aria-label="' + esc(t("converting")) + '"><i data-progress="' + item.id + '" style="width:' + Math.round(item.fix.progress * 100) + '%"></i></div>';
+    else h += '<button type="button" class="btn" data-reveal="' + item.id + '">' + esc(t("showFixed")) + "</button>";
+  }
+  if (item.fix.state !== "fixing") h += '<button type="button" class="btn ghost" data-remove="' + item.id + '" aria-label="' + esc(t("remove")) + '" title="' + esc(t("remove")) + '">✕</button>';
+  h += "</div>";
+
+  const shown = state.showAll[item.id] ? F : F.filter((f) => f.status !== "pass");
+  if (shown.length) h += findingsGrid(shown);
+  if (F.some((f) => f.status === "pass") && F.length) h += '<div class="more"><button type="button" class="btn link" data-toggle="' + item.id + '">' + esc(state.showAll[item.id] ? t("hidePass") : t("showAll", { n: F.length })) + "</button></div>";
+
+  if (st === "fail") {
+    if (item.fix.state === "idle" && p) {
+      if (p.error) h += '<div class="reason">✋ <span>' + esc(p.error) + "</span></div>";
+      else h += '<div class="plan"><b>' + esc(t("fixWill")) + "</b><ul>" + p.actions.map((a) => "<li>" + esc(a) + "</li>").join("") + "</ul>" + esc(t("origSafe")) + "</div>";
+    } else if (item.fix.state === "fixing") {
+      h += '<div class="plan">' + esc(t("converting")) + "</div>";
+    } else if (item.fix.state === "fixed") {
+      const FF = check(item.fix.info, spec), fs = worst(FF);
+      h += '<div class="fixed-box' + (fs === "fail" ? " still" : "") + '">' + statusDot(fs, true) + "<b>" + esc(item.fix.info.name) + "</b> — " + esc(fs === "fail" ? t("fixedStill", { n: FF.filter((f) => f.status === "fail").length }) : t("fixedPass")) + '<span class="item-sub">' + esc([item.fix.info.w + "×" + item.fix.info.h, item.fix.info.dur != null ? fmtS(item.fix.info.dur) : null, fmtMB(item.fix.info.sizeMB)].filter(Boolean).join(" · ")) + "</span></div>";
+      if (fs !== "pass") h += findingsGrid(FF.filter((f) => f.status !== "pass"));
+    }
+  }
+  return h + "</li>";
+}
+
+function renderPresets() {
+  const presets = [["To MP4", "H.264 · CRF 23"], ["To MKV", "H.264 · CRF 23"], ["To WEBM", "VP9"], ["To GIF", "15 fps"], ["To MP3", "VBR 190 kbps"], ["To AAC", "128 kbps"], ["To WAV", "16-bit"], ["To JPG", "quality 90"], ["To PNG", "lossless"], ["To WEBP", "quality 40"], ["To PDF", "200 dpi"], ["To ICO", "≤ 256 px"]];
+  return '<div class="pane"><h3>' + esc(t("presetsTitle")) + '</h3><p class="muted">' + esc(t("presetsBody")) + '</p><div class="preset-grid">' + presets.map(([n, d]) => '<div class="preset"><b>' + n + "</b><span>" + d + "</span></div>").join("") + "</div></div>";
+}
+
+function renderSettings() {
+  const s = state.settings;
+  return '<div class="pane"><div class="form">' +
+    '<div class="form-group"><h4>' + esc(t("sGeneral")) + '</h4><div class="field"><label for="st-c">' + esc(t("sConcurrent")) + '</label><input id="st-c" type="text" inputmode="numeric" value="' + s.concurrent + '" data-setting="concurrent" style="max-width:80px"></div>' +
+    '<div class="field"><span>' + esc(t("sQuit")) + '</span><label><input type="checkbox" data-setting="quit"' + (s.quit ? " checked" : "") + "></label></div></div>" +
+    '<div class="form-group"><h4>' + esc(t("sAI")) + '</h4><div class="field"><label for="st-k">' + esc(t("sKey")) + '</label><input id="st-k" type="password" placeholder="sk-ant-…" value="' + esc(s.key) + '" data-setting="key"></div><div class="field"><span></span><span><button type="button" class="btn" data-act="savekey">' + esc(t("sSave")) + "</button> " + (s.saved ? '<span class="ok-text">✓ ' + esc(t("sSaved")) + "</span>" : "") + '</span><span class="hint">' + esc(t("sKeyHint")) + "</span></div></div>" +
+    '<div class="form-group"><h4>' + esc(t("sBackends")) + "</h4>" +
+    [["ffmpeg", "/opt/homebrew/bin/ffmpeg"], ["ffprobe", "/opt/homebrew/bin/ffprobe"], ["ImageMagick", "/opt/homebrew/bin/magick"], ["LibreOffice", "/Applications/LibreOffice.app"]].map(([n, p]) => '<div class="field"><span>' + n + '</span><span class="mono"><span class="ok-text">✓</span> ' + p + "</span></div>").join("") +
+    "</div></div></div>";
+}
+
+/* ------------------------------------------------------------------ modals */
+const modalRoot = document.getElementById("modal-root");
+function renderModal() {
+  if (!state.modal) { modalRoot.innerHTML = ""; return; }
+  if (state.modal === "library") modalRoot.innerHTML = '<div class="scrim" data-scrim><div class="sheet" role="dialog" aria-modal="true" aria-label="' + esc(t("libTitle")) + '">' + renderLibrary() + "</div></div>";
+  if (state.modal === "ai") modalRoot.innerHTML = '<div class="scrim" data-scrim><div class="sheet narrow" role="dialog" aria-modal="true" aria-label="' + esc(t("aiTitle")) + '">' + renderAI() + "</div></div>";
+}
+
+function renderLibrary() {
+  const sel = state.specs.find((s) => s.id === state.libSel) || state.specs[0];
+  state.libSel = sel.id;
+  let h = '<div class="sheet-body"><div class="spec-list">' + state.specs.map((s) => '<button type="button" data-libsel="' + s.id + '" aria-current="' + (s.id === sel.id) + '">' + (s.ai ? "✨ " : "") + esc(specName(s)) + "<small>" + esc(specSummary(s)) + "</small></button>").join("") + "</div>";
+  h += '<div class="spec-editor">';
+  if (sel.ai) h += '<div class="ai-banner"><span aria-hidden="true">✨</span><div class="grow"><b>' + esc(t("aiBannerTitle")) + "</b>" + esc(t("aiBannerBody")) + '</div><button type="button" class="btn" data-act="reviewed">' + esc(t("looksRight")) + "</button></div>";
+  const v = (x) => (x == null ? "" : esc(Array.isArray(x) ? x.join(", ") : x));
+  const field = (key, label, val, ph) => '<div class="field"><label for="f-' + key + '">' + esc(t(label)) + '</label><input id="f-' + key + '" type="text" data-field="' + key + '" value="' + v(val) + '" placeholder="' + esc(t(ph || "phAny")) + '"></div>';
+  h += '<div class="form-group"><h4>' + esc(t("f_general")) + "</h4>" + '<div class="field"><label for="f-name">' + esc(t("f_name")) + '</label><input id="f-name" type="text" data-field="name" value="' + esc(specName(sel)) + '"></div>' +
+    '<div class="field"><label for="f-notes">' + esc(t("f_notes")) + '</label><input id="f-notes" type="text" data-field="notes" value="' + esc(specNotes(sel)) + '"></div>' +
+    '<div class="field"><span>' + esc(t("f_for")) + '</span><span class="kinds">' + ["video", "image", "audio", "document"].map((k) => '<label><input type="checkbox" data-kind="' + k + '"' + (sel.kinds.includes(k) ? " checked" : "") + "> " + esc(t("kind_" + k)) + "</label>").join("") + "</span></div></div>";
+  h += '<div class="form-group"><h4>' + esc(t("f_file")) + "</h4>" + field("exts", "f_formats", sel.exts, "phFormats") + field("maxMB", "f_maxSize", sel.maxMB) + "</div>";
+  h += '<div class="form-group"><h4>' + esc(t("f_frame")) + "</h4>" + field("width", "f_width", sel.width) + field("height", "f_height", sel.height) + field("ratios", "f_ratios", sel.ratios, "phRatios") + "</div>";
+  h += '<div class="form-group"><h4>' + esc(t("f_timing")) + "</h4>" + field("minDur", "f_minDur", sel.minDur) + field("maxDur", "f_maxDur", sel.maxDur) + field("maxFps", "f_maxFps", sel.maxFps) + "</div>";
+  h += '<div class="form-group"><h4>' + esc(t("f_codecs")) + "</h4>" + field("vcodecs", "f_vcodec", sel.vcodecs) + field("acodecs", "f_acodec", sel.acodecs) +
+    '<div class="field"><label for="f-audio">' + esc(t("f_audio")) + '</label><select id="f-audio" data-field="audio">' + ["optional", "required", "forbidden"].map((a) => '<option value="' + a + '"' + (sel.audio === a ? " selected" : "") + ">" + esc(t("aud_" + a)) + "</option>").join("") + '</select></div><div class="field"><span></span><span class="hint">' + esc(t("emptyHint")) + "</span></div></div>";
+  h += "</div></div>";
+  h += '<div class="sheet-foot"><button type="button" class="btn" data-act="newspec">+ ' + esc(t("newSpec")) + '</button><button type="button" class="btn" data-act="dupspec">' + esc(t("duplicate")) + '</button><button type="button" class="btn ai" data-act="openai">✨ ' + esc(t("aiDraft")) + '</button><button type="button" class="btn" data-act="delspec"' + (state.specs.length > 1 ? "" : " disabled") + ">" + esc(t("del")) + '</button><span class="spacer"></span><button type="button" class="btn ghost" data-act="restore">' + esc(t("restore")) + '</button><button type="button" class="btn primary" data-act="closelib">' + esc(t("done")) + "</button></div>";
+  return h;
+}
+
+function renderAI() {
+  return '<div class="sheet-pad"><h3>✨ ' + esc(t("aiTitle")) + '</h3><p class="summary" style="margin:0">' + esc(t("aiBody")) + '</p><textarea id="ai-text" data-ai-text placeholder="Video: MP4, H.264, 9:16, 1080×1920, 5–60 s, ≤ 30 MB…">' + esc(state.aiText) + "</textarea>" +
+    (state.aiError ? '<div class="err">' + esc(state.aiError) + "</div>" : "") +
+    '<div class="notes">' + esc(t("aiDemoNote")) + "</div></div>" +
+    '<div class="sheet-foot"><button type="button" class="btn" data-act="aiexample">' + esc(t("aiPasteExample")) + '</button><span class="spacer"></span>' +
+    (state.aiWorking ? '<span class="summary">' + statusDot(null, true) + " " + esc(t("aiWorking")) + "</span>" : "") +
+    '<button type="button" class="btn" data-act="aicancel"' + (state.aiWorking ? " disabled" : "") + ">" + esc(t("aiCancel")) + '</button><button type="button" class="btn primary" data-act="aidraft"' + (state.aiWorking ? " disabled" : "") + ">" + esc(t("aiDraftBtn")) + "</button></div>";
+}
+
+/* ------------------------------------------------------------------ reports */
+function reportRows() {
+  const spec = currentSpec();
+  return state.items.filter((i) => !i.checking).map((i) => {
+    const info = i.fix.state === "fixed" ? i.fix.info : i.info;
+    const F = check(info, spec);
+    return { name: info.name, spec: specName(spec), status: worst(F), F };
+  });
+}
+function download(name, text, type) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  toast(t("toastExport", { name }));
+}
+const label = (s) => (s === "pass" ? "Pass" : s === "warning" ? "Review" : "Fail");
+function exportCSV() {
+  const q = (v) => (/[",\n]/.test(v) ? '"' + String(v).replace(/"/g, '""') + '"' : v);
+  const rows = [["File", "Spec", "Overall", "Rule", "Status", "Expected", "Actual"]];
+  reportRows().forEach((r) => r.F.forEach((f) => rows.push([r.name, r.spec, label(r.status), t("rule_" + f.rule), label(f.status), f.expected, f.actual])));
+  download("spec-check-report.csv", "﻿" + rows.map((r) => r.map(q).join(",")).join("\r\n") + "\r\n", "text/csv;charset=utf-8");
+}
+function exportHTML() {
+  const rows = reportRows();
+  const n = (s) => rows.filter((r) => r.status === s).length;
+  const icon = (s) => (s === "pass" ? '<b style="color:#16a34a">✓</b>' : s === "warning" ? '<b style="color:#d97706">!</b>' : '<b style="color:#dc2626">✕</b>');
+  const body = rows.map((r) => '<section style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin:14px 0"><h2 style="font-size:16px;margin:0">' + icon(r.status) + " " + esc(r.name) + '</h2><p style="color:#6b7280;margin:2px 0 10px">' + esc(r.spec) + '</p><table style="border-collapse:collapse;width:100%;font-size:14px">' + r.F.map((f) => '<tr style="border-top:1px solid #e5e7eb' + (f.status === "fail" ? ";color:#dc2626" : "") + '"><td style="padding:5px 6px">' + esc(t("rule_" + f.rule)) + '</td><td style="padding:5px 6px;color:#6b7280">' + esc(f.expected) + '</td><td style="padding:5px 6px">' + esc(f.actual) + '</td><td>' + icon(f.status) + "</td></tr>").join("") + "</table></section>").join("");
+  download("spec-check-report.html", '<!doctype html><html lang="' + lang + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + esc(t("reportTitle")) + '</title></head><body style="font:15px/1.5 -apple-system,system-ui,sans-serif;max-width:860px;margin:32px auto;padding:0 16px;color:#111827"><h1 style="margin:0">' + esc(t("reportTitle")) + '</h1><p style="color:#6b7280">' + esc(new Date().toLocaleString(lang)) + " · " + esc(t("reportFiles", { n: rows.length })) + '</p><p><b style="color:#16a34a">✓ ' + esc(t("countPass", { n: n("pass") })) + '</b> &nbsp; <b style="color:#d97706">! ' + esc(t("countReview", { n: n("warning") })) + '</b> &nbsp; <b style="color:#dc2626">✕ ' + esc(t("countFail", { n: n("fail") })) + "</b></p>" + body + "</body></html>", "text/html;charset=utf-8");
+}
+
+/* ------------------------------------------------------------------ toast */
+let toastTimer;
+function toast(msg) {
+  const root = document.getElementById("toast-root");
+  root.innerHTML = '<div class="toast">' + esc(msg) + "</div>";
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { root.innerHTML = ""; }, 2600);
+}
+
+/* ------------------------------------------------------------------ events */
+const fileInput = document.getElementById("file-input");
+fileInput.addEventListener("change", () => { addRealFiles(fileInput.files); fileInput.value = ""; });
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("button, [data-scrim]");
+  if (!el) { if (state.menuOpen) { state.menuOpen = false; render(); } return; }
+  if (el.hasAttribute("data-scrim") && e.target === el && !state.aiWorking) { state.modal = state.modal === "ai" ? "library" : null; render(); return; }
+  if (el.tagName !== "BUTTON") return;
+  const d = el.dataset;
+  if (d.lang) { lang = d.lang; try { localStorage.setItem("speccheck-lang", lang); } catch (err) {} render(); return; }
+  if (d.tab) { state.tab = d.tab; state.menuOpen = false; render(); return; }
+  if (d.fit) { state.fit = d.fit; render(); return; }
+  if (d.fix) { const it = state.items.find((i) => i.id === +d.fix); if (it) runFix(it); return; }
+  if (d.reveal) { const it = state.items.find((i) => i.id === +d.reveal); if (it) toast(t("toastFinder", { name: it.fix.info.name })); return; }
+  if (d.remove) { state.items = state.items.filter((i) => i.id !== +d.remove); render(); return; }
+  if (d.toggle) { state.showAll[d.toggle] = !state.showAll[d.toggle]; render(); return; }
+  if (d.libsel) { state.libSel = d.libsel; render(); return; }
+  const act = d.act;
+  if (act !== "menu" && state.menuOpen) state.menuOpen = false;
+  switch (act) {
+    case "samples": addSamples(); break;
+    case "choose": fileInput.click(); break;
+    case "fixall": state.items.filter(fixable).forEach(runFix); break;
+    case "clear": state.items = state.items.filter((i) => i.fix.state === "fixing"); render(); break;
+    case "menu": state.menuOpen = !state.menuOpen; render(); break;
+    case "export-html": render(); exportHTML(); break;
+    case "export-csv": render(); exportCSV(); break;
+    case "library": state.modal = "library"; state.libSel = state.specId; render(); break;
+    case "closelib": state.modal = null; render(); break;
+    case "newspec": { const s = { id: "u" + Date.now(), name: t("newSpec"), notes: "", kinds: [], exts: null, maxMB: null, width: null, height: null, ratios: null, minDur: null, maxDur: null, maxFps: null, vcodecs: null, acodecs: null, audio: "optional" }; state.specs.push(s); state.libSel = s.id; render(); break; }
+    case "dupspec": { const src = state.specs.find((s) => s.id === state.libSel); if (src) { const s = JSON.parse(JSON.stringify(src)); s.id = "u" + Date.now(); s.builtIn = false; s.ai = false; s.name = specName(src) + t("copySuffix"); s.notes = specNotes(src); state.specs.push(s); state.libSel = s.id; render(); } break; }
+    case "delspec": if (state.specs.length > 1) { const idx = state.specs.findIndex((s) => s.id === state.libSel); state.specs.splice(idx, 1); if (!state.specs.some((s) => s.id === state.specId)) selectSpec(state.specs[0].id); state.libSel = state.specs[Math.max(0, idx - 1)].id; render(); } break;
+    case "restore": DEFAULT_SPECS.forEach((d0) => { const i = state.specs.findIndex((s) => s.id === d0.id); const c = JSON.parse(JSON.stringify(d0)); if (i >= 0) state.specs[i] = c; else state.specs.push(c); }); render(); break;
+    case "reviewed": { const s = state.specs.find((x) => x.id === state.libSel); if (s) s.ai = false; render(); break; }
+    case "openai": state.modal = "ai"; state.aiError = ""; render(); setTimeout(() => document.getElementById("ai-text")?.focus(), 0); break;
+    case "aicancel": state.modal = "library"; render(); break;
+    case "aiexample": state.aiText = AI_EXAMPLE; state.aiError = ""; render(); break;
+    case "aidraft":
+      if (!state.aiText.trim()) { state.aiError = t("aiEmpty"); render(); break; }
+      state.aiWorking = true; state.aiError = ""; render();
+      setTimeout(() => { const s = AI_DRAFT(); state.specs.push(s); state.libSel = s.id; selectSpec(s.id); state.aiWorking = false; state.aiText = ""; state.modal = "library"; render(); }, 1600);
+      break;
+    case "savekey": state.settings.saved = !!state.settings.key; render(); break;
+  }
+});
+
+document.addEventListener("change", (e) => {
+  const el = e.target;
+  if (el.id === "spec-select") { selectSpec(el.value); render(); return; }
+  if (el.dataset.setting === "quit") { state.settings.quit = el.checked; return; }
+  if (el.dataset.kind) {
+    const s = state.specs.find((x) => x.id === state.libSel); if (!s) return;
+    s.kinds = el.checked ? [...new Set([...s.kinds, el.dataset.kind])] : s.kinds.filter((k) => k !== el.dataset.kind);
+    render(); return;
+  }
+  if (el.dataset.field) commitField(el, true);
+});
+document.addEventListener("input", (e) => {
+  const el = e.target;
+  if (el.hasAttribute("data-ai-text")) { state.aiText = el.value; return; }
+  if (el.dataset.setting === "key") { state.settings.key = el.value; state.settings.saved = false; return; }
+  if (el.dataset.setting === "concurrent") { state.settings.concurrent = el.value.replace(/\D/g, "") || ""; return; }
+  if (el.dataset.field) commitField(el, false);
+});
+function commitField(el, rerender) {
+  const s = state.specs.find((x) => x.id === state.libSel); if (!s) return;
+  const k = el.dataset.field, raw = el.value.trim();
+  const list = (x) => { const a = x.split(/[,;\s]+/).map((p) => p.trim().toLowerCase()).filter(Boolean); return a.length ? a : null; };
+  if (k === "name") s.name = el.value;
+  else if (k === "notes") s.notes = el.value;
+  else if (k === "audio") s.audio = el.value;
+  else if (k === "exts") { const a = list(raw); s.exts = a ? a.map(normExt) : null; }
+  else if (k === "vcodecs" || k === "acodecs") s[k] = list(raw);
+  else if (k === "ratios") { const a = (list(raw) || []).filter((r) => /^\d+[:x/]\d+$/.test(r)).map((r) => r.replace(/[x/]/, ":")); s.ratios = a.length ? a : null; }
+  else { const n = parseFloat(raw.replace(",", ".")); s[k] = raw === "" || isNaN(n) ? null : n; }
+  if (rerender) render();
+  else { const btn = document.querySelector('[data-libsel="' + s.id + '"]'); if (btn) btn.innerHTML = (s.ai ? "✨ " : "") + esc(specName(s)) + "<small>" + esc(specSummary(s)) + "</small>"; }
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    if (state.menuOpen) { state.menuOpen = false; render(); }
+    else if (state.modal && !state.aiWorking) { state.modal = state.modal === "ai" ? "library" : null; render(); }
+  }
+});
+
+// Drag & drop anywhere on the window
+const win = document.querySelector(".window");
+let dragDepth = 0;
+win.addEventListener("dragenter", (e) => { e.preventDefault(); dragDepth++; state.tab === "check" && document.getElementById("dropzone")?.classList.add("drag"); });
+win.addEventListener("dragover", (e) => e.preventDefault());
+win.addEventListener("dragleave", () => { if (--dragDepth <= 0) { dragDepth = 0; document.getElementById("dropzone")?.classList.remove("drag"); } });
+win.addEventListener("drop", (e) => {
+  e.preventDefault(); dragDepth = 0; document.getElementById("dropzone")?.classList.remove("drag");
+  if (state.tab !== "check") { state.tab = "check"; render(); }
+  addRealFiles(e.dataTransfer.files);
+});
+
+render();
+</script>
+</body>
+</html>
