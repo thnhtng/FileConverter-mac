@@ -192,10 +192,6 @@ public struct ClaudeSpecImporter: Sendable {
         }
         spec.id = UUID()
         spec.isBuiltIn = false
-        // Re-run the initializer's normalization (".MP4" -> "mp4", "jpeg" -> "jpg").
-        spec.allowedExtensions = spec.allowedExtensions?.map(DeliverySpec.normalizedExtension)
-        spec.allowedVideoCodecs = spec.allowedVideoCodecs?.map { $0.lowercased() }
-        spec.allowedAudioCodecs = spec.allowedAudioCodecs?.map { $0.lowercased() }
         return spec
     }
 

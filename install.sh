@@ -108,7 +108,6 @@ xattr -cr "/Applications/$APP_NAME" 2>/dev/null || true
 # requirement applies.
 QUICK_ACTION_ID="io.file-converter.mac.QuickAction"
 QUICK_ACTION_PATH="/Applications/$APP_NAME/Contents/PlugIns/File Converter Quick Action.appex"
-QUICK_ACTION_WORKFLOW="$HOME/Library/Services/Convert with File Converter.workflow"
 
 pluginkit -D -m -v -i "$QUICK_ACTION_ID" 2>/dev/null | awk -F'\t' 'NF>1{print $NF}' | while IFS= read -r existing; do
     [[ "$existing" == "$QUICK_ACTION_PATH" ]] || pluginkit -r "$existing" 2>/dev/null || true
@@ -116,11 +115,16 @@ done
 pluginkit -a "$QUICK_ACTION_PATH" 2>/dev/null || true
 pluginkit -e use -i "$QUICK_ACTION_ID" 2>/dev/null || true
 
-log "Installing the Quick Action…"
-rm -rf "$QUICK_ACTION_WORKFLOW"
-mkdir -p "$QUICK_ACTION_WORKFLOW/Contents"
+# Writes one Automator Service. $1 = menu title, $2 = bundle id,
+# $3 = extra CLI args for the app (e.g. "--check "), placed before the files.
+install_service() {
+    local title="$1" bundle_id="$2" extra_args="$3"
+    local workflow="$HOME/Library/Services/$title.workflow"
+    rm -rf "$workflow"
+    mkdir -p "$workflow/Contents"
 
-cat > "$QUICK_ACTION_WORKFLOW/Contents/Info.plist" <<PLIST_EOF
+
+cat > "$workflow/Contents/Info.plist" <<PLIST_EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -131,7 +135,7 @@ cat > "$QUICK_ACTION_WORKFLOW/Contents/Info.plist" <<PLIST_EOF
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>Convert with File Converter</string>
+				<string>$title</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>runWorkflowAsService</string>
@@ -147,14 +151,14 @@ cat > "$QUICK_ACTION_WORKFLOW/Contents/Info.plist" <<PLIST_EOF
 		</dict>
 	</array>
 	<key>CFBundleIdentifier</key>
-	<string>io.file-converter.mac.quickaction-workflow</string>
+	<string>$bundle_id</string>
 	<key>CFBundleName</key>
-	<string>Convert with File Converter</string>
+	<string>$title</string>
 </dict>
 </plist>
 PLIST_EOF
 
-cat > "$QUICK_ACTION_WORKFLOW/Contents/document.wflow" <<WFLOW_EOF
+cat > "$workflow/Contents/document.wflow" <<WFLOW_EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -216,7 +220,7 @@ cat > "$QUICK_ACTION_WORKFLOW/Contents/document.wflow" <<WFLOW_EOF
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>"/Applications/File Converter.app/Contents/MacOS/File Converter" "\$@"</string>
+					<string>"/Applications/File Converter.app/Contents/MacOS/File Converter" $extra_args"\$@"</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>
@@ -314,8 +318,15 @@ cat > "$QUICK_ACTION_WORKFLOW/Contents/document.wflow" <<WFLOW_EOF
 </dict>
 </plist>
 WFLOW_EOF
+}
+
+log "Installing the Quick Actions…"
+install_service "Convert with File Converter" "io.file-converter.mac.quickaction-workflow" ""
+# Spec Check: opens the selected files in the Spec Check tab instead of
+# converting them (LaunchRequest --check).
+install_service "Check with File Converter" "io.file-converter.mac.check-workflow" "--check "
 
 /System/Library/CoreServices/pbs -flush 2>/dev/null || true
 killall Finder 2>/dev/null || true
 
-log "Done. Right-click any supported file in Finder → Quick Actions → \"Convert with File Converter\""
+log "Done. Right-click any supported file in Finder → Quick Actions → \"Convert with File Converter\" or \"Check with File Converter\""

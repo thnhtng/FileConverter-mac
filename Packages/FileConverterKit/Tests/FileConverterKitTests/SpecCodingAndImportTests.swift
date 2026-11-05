@@ -41,6 +41,14 @@ final class SpecCodingAndImportTests: XCTestCase {
         XCTAssertNil(video.maxVideoBitrateKbps)
     }
 
+    func testEditsAreNormalizedToo() {
+        var spec = DeliverySpec(name: "x")
+        spec.allowedExtensions = [".JPEG", "PNG"]
+        spec.allowedVideoCodecs = ["H264"]
+        XCTAssertEqual(spec.allowedExtensions, ["jpg", "png"])
+        XCTAssertEqual(spec.allowedVideoCodecs, ["h264"])
+    }
+
     func testAspectRatioParsing() {
         XCTAssertEqual(AspectRatio(string: "9:16"), .vertical9x16)
         XCTAssertEqual(AspectRatio(string: "16x9"), .landscape16x9)

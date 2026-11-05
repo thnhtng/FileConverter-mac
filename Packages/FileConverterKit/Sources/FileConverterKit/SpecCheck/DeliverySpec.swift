@@ -49,7 +49,10 @@ public struct DeliverySpec: Codable, Identifiable, Equatable, Sendable {
     /// Media kinds this spec is for. Empty = any kind.
     public var mediaKinds: [MediaKind]
     /// Lowercased extensions without the dot. nil/empty = any.
-    public var allowedExtensions: [String]?
+    /// Normalized on every assignment (".JPEG" -> "jpg").
+    public var allowedExtensions: [String]? {
+        didSet { allowedExtensions = allowedExtensions?.map(Self.normalizedExtension) }
+    }
     public var maxFileSizeMB: Double?
 
     /// Exact display size. Takes precedence over the min/max bounds below.
@@ -71,8 +74,12 @@ public struct DeliverySpec: Codable, Identifiable, Equatable, Sendable {
     public var maxFramesPerSecond: Double?
 
     /// ffprobe codec names, lowercased ("h264", "hevc", "vp9", "aac"...).
-    public var allowedVideoCodecs: [String]?
-    public var allowedAudioCodecs: [String]?
+    public var allowedVideoCodecs: [String]? {
+        didSet { allowedVideoCodecs = allowedVideoCodecs?.map { $0.lowercased() } }
+    }
+    public var allowedAudioCodecs: [String]? {
+        didSet { allowedAudioCodecs = allowedAudioCodecs?.map { $0.lowercased() } }
+    }
     public var audio: AudioRequirement
 
     /// True for the built-in examples, so the UI can offer "reset".

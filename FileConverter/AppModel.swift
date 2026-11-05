@@ -25,11 +25,25 @@ enum LaunchState {
 /// Root app state: loaded settings/presets, and the current launch state.
 /// Replaces the Windows app's `SettingsService` + `MainViewModel` combo,
 /// minus the WPF data-binding machinery.
+/// Top-level tabs of the main window.
+enum MainTab: String, CaseIterable, Identifiable {
+    case specCheck = "Spec Check"
+    case presets = "Presets"
+    case settings = "Settings"
+    var id: String { rawValue }
+}
+
 @MainActor
 final class AppModel: ObservableObject {
     @Published var settings: AppSettings
     @Published var launchState: LaunchState = .idle
     @Published var loadError: String?
+    @Published var selectedTab: MainTab = .specCheck
+    @Published var selectedSpecID: UUID?
+
+    /// Spec Check tab state. Owned here so Quick Action / CLI hand-offs
+    /// (`LaunchRequest.Mode.check`) can feed it files.
+    let specCheck = SpecCheckModel()
 
     private let storeURL: URL
 
@@ -41,6 +55,27 @@ final class AppModel: ObservableObject {
             self.settings = AppSettings()
             self.loadError = error.localizedDescription
         }
+        if settings.deliverySpecs.isEmpty {
+            settings.deliverySpecs = DefaultSpecs.all
+        }
+        selectedSpecID = settings.deliverySpecs.first?.id
+        specCheck.configure(maxConcurrency: settings.maximumSimultaneousConversions)
+    }
+
+    /// The spec Spec Check currently checks against.
+    var selectedSpec: DeliverySpec? {
+        settings.deliverySpecs.first { $0.id == selectedSpecID } ?? settings.deliverySpecs.first
+    }
+
+    /// Opens files in Spec Check against the selected spec.
+    func checkFiles(_ files: [URL]) {
+        guard let spec = selectedSpec else {
+            loadError = "Add a delivery spec first."
+            return
+        }
+        launchState = .idle
+        selectedTab = .specCheck
+        specCheck.add(files, spec: spec)
     }
 
     func save() {
@@ -67,6 +102,11 @@ final class AppModel: ObservableObject {
     /// the picker.
     func handle(request: LaunchRequest) {
         guard !request.fileURLs.isEmpty else { return }
+
+        if request.mode == .check {
+            checkFiles(request.fileURLs)
+            return
+        }
 
         if let name = request.presetName,
            let preset = settings.presets.first(where: { $0.fullName == name || $0.shortName == name }),
