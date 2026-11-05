@@ -49,6 +49,11 @@ public enum ImageMagickArgumentBuilder {
                 args += ["-rotate", "\(image.rotationDegrees)"]
             }
 
+            // Spec Check fix: land on an exact frame size.
+            if let target = image.frameTarget, target.width > 0, target.height > 0 {
+                args += frameTargetArgs(target)
+            }
+
             // clampSizeToPowerOfTwo: the Ico pipeline's intermediate PNG
             // stage. We don't probe actual pixel dimensions here (that would
             // need a synchronous `identify` round-trip); ImageMagick's
@@ -82,5 +87,20 @@ public enum ImageMagickArgumentBuilder {
 
         args.append(outputURL.path)
         return Plan(arguments: args, producesMultiplePages: false)
+    }
+
+    /// `-extent` after a fit/cover `-resize` = pad/crop to the exact size,
+    /// centered. `+repage` drops the virtual canvas offset so formats that
+    /// store it (PNG, GIF) don't report a stale page geometry.
+    static func frameTargetArgs(_ target: FrameTarget) -> [String] {
+        let size = "\(target.width)x\(target.height)"
+        switch target.fitMode {
+        case .pad:
+            return ["-resize", size, "-background", "black", "-gravity", "center", "-extent", size, "+repage"]
+        case .crop:
+            return ["-resize", "\(size)^", "-gravity", "center", "-extent", size, "+repage"]
+        case .stretch:
+            return ["-resize", "\(size)!"]
+        }
     }
 }

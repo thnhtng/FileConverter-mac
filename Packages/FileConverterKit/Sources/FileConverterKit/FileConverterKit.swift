@@ -9,5 +9,5 @@
 
 public enum FileConverterKit {
     /// Bumped whenever the on-disk settings/preset schema changes.
-    public static let settingsSchemaVersion = 1
+    public static let settingsSchemaVersion = 2
 }

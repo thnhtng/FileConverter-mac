@@ -20,18 +20,24 @@ public struct ImageSettings: Codable, Equatable, Sendable {
     /// ImageMaximumSize, in pixels. 0/nil = unbounded.
     public var maximumSizePixels: Int?
 
+    /// Spec Check fix: resize/pad/crop to an exact frame size. Optional so
+    /// older settings.json files still decode. See `VideoSettings.frameTarget`.
+    public var frameTarget: FrameTarget?
+
     public init(
         quality: Int = 90,
         scale: Double = 1,
         rotationDegrees: Int = 0,
         clampSizeToPowerOfTwo: Bool = false,
-        maximumSizePixels: Int? = nil
+        maximumSizePixels: Int? = nil,
+        frameTarget: FrameTarget? = nil
     ) {
         self.quality = quality
         self.scale = scale
         self.rotationDegrees = rotationDegrees
         self.clampSizeToPowerOfTwo = clampSizeToPowerOfTwo
         self.maximumSizePixels = maximumSizePixels
+        self.frameTarget = frameTarget
     }
 }
 
