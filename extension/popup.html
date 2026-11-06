@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>File Converter</title>
+<link rel="stylesheet" href="ext.css">
+</head>
+<body class="popup">
+<header class="pop-head">
+  <img src="icons/icon-32.png" width="22" height="22" alt="">
+  <div class="grow"><b data-i18n="title"></b><div class="muted small" data-i18n="subtitle"></div></div>
+  <div class="lang" id="lang" role="group"></div>
+</header>
+<nav class="filters" id="filters" role="tablist"></nav>
+<div id="notice" class="notice" hidden></div>
+<main id="list" class="media-list" aria-live="polite"></main>
+<footer class="pop-foot">
+  <div class="bulk" id="bulk" hidden>
+    <span id="sel-count" class="small muted"></span>
+    <span class="grow"></span>
+    <button type="button" class="btn" id="dl-selected" data-i18n="downloadSelected"></button>
+    <select id="conv-selected" aria-label="Convert selected"></select>
+  </div>
+  <div class="row">
+    <label class="small"><input type="checkbox" id="select-all"> <span data-i18n="selectAll"></span></label>
+    <span class="grow"></span>
+    <a href="#" id="open-local" class="small" data-i18n="openConverter"></a>
+  </div>
+</footer>
+<script type="module" src="popup.js"></script>
+</body>
+</html>

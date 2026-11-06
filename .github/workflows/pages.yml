@@ -1,12 +1,12 @@
 # Builds the in-browser converter (web/ + shared/formats.json + ffmpeg.wasm
-# from npm) and publishes it to GitHub Pages. Enable once in the repo:
+# from npm) plus the browser-extension zip, and publishes both to GitHub Pages. Enable once in the repo:
 # Settings -> Pages -> Source: GitHub Actions.
 name: Deploy web converter
 
 on:
   push:
     branches: [main]
-    paths: [web/**, shared/**, scripts/build-web.sh, .github/workflows/pages.yml]
+    paths: [web/**, shared/**, extension/**, scripts/build-*.sh, .github/workflows/pages.yml]
   workflow_dispatch:
 
 permissions:
@@ -30,6 +30,8 @@ jobs:
         with:
           node-version: 20
       - run: scripts/build-web.sh
+      # The site also hosts the extension zip that index.html links to.
+      - run: scripts/build-extension.sh && cp dist/FileConverter-extension.zip dist/web/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

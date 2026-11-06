@@ -17,6 +17,7 @@
   }
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { margin: 0; }
 html { scroll-behavior: smooth; }
 body { font: 16px/1.6 var(--font); color: var(--text); background: var(--page); -webkit-font-smoothing: antialiased; }
