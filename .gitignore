@@ -4,3 +4,5 @@ DerivedData/
 xcuserdata/
 .DS_Store
 FileConverterMac.xcodeproj/
+dist/
+.cache/

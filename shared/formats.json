@@ -1,0 +1,373 @@
+{
+  "_comment": "Single source of truth for formats shared by the web converter, the browser extension and the Windows/macOS right-click menus. Mirrors Packages/FileConverterKit (InputCategory.swift, DefaultPresets.swift, FFmpegQualityFormulas.swift); SharedFormatsTests keeps them in sync. 'web': false = desktop app only. 'webFfmpeg' replaces 'ffmpeg' in the browser only (VP9 crashes single-threaded ffmpeg.wasm, so web WebM is VP8).",
+  "version": 1,
+  "categories": {
+    "audio": [
+      "aac",
+      "aiff",
+      "ape",
+      "cda",
+      "flac",
+      "mp3",
+      "m4a",
+      "m4b",
+      "oga",
+      "ogg",
+      "opus",
+      "wav",
+      "wma"
+    ],
+    "video": [
+      "3gp",
+      "3gpp",
+      "avi",
+      "bik",
+      "flv",
+      "m4v",
+      "mp4",
+      "mpg",
+      "mpeg",
+      "mov",
+      "mkv",
+      "ogv",
+      "rm",
+      "ts",
+      "vob",
+      "webm",
+      "wmv"
+    ],
+    "image": [
+      "arw",
+      "avif",
+      "bmp",
+      "cr2",
+      "dds",
+      "dng",
+      "exr",
+      "heic",
+      "ico",
+      "jfif",
+      "jpg",
+      "jpeg",
+      "nef",
+      "png",
+      "psd",
+      "raf",
+      "tga",
+      "tif",
+      "tiff",
+      "svg",
+      "webp"
+    ],
+    "animatedImage": [
+      "gif"
+    ],
+    "document": [
+      "pdf",
+      "doc",
+      "docx",
+      "ppt",
+      "pptx",
+      "odp",
+      "ods",
+      "odt",
+      "xls",
+      "xlsx"
+    ]
+  },
+  "outputs": {
+    "mp4": {
+      "label": "MP4",
+      "kind": "video",
+      "accepts": [
+        "video",
+        "animatedImage"
+      ],
+      "ffmpeg": [
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "23",
+        "-pix_fmt",
+        "yuv420p",
+        "-vf",
+        "scale=trunc(iw/2)*2:trunc(ih/2)*2",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "128k",
+        "-movflags",
+        "+faststart"
+      ]
+    },
+    "mkv": {
+      "label": "MKV",
+      "kind": "video",
+      "accepts": [
+        "video",
+        "animatedImage"
+      ],
+      "ffmpeg": [
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "23",
+        "-pix_fmt",
+        "yuv420p",
+        "-vf",
+        "scale=trunc(iw/2)*2:trunc(ih/2)*2",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "128k"
+      ]
+    },
+    "webm": {
+      "label": "WEBM",
+      "kind": "video",
+      "accepts": [
+        "video",
+        "animatedImage"
+      ],
+      "ffmpeg": [
+        "-c:v",
+        "libvpx-vp9",
+        "-crf",
+        "23",
+        "-b:v",
+        "0",
+        "-c:a",
+        "libvorbis",
+        "-q:a",
+        "5"
+      ],
+      "webFfmpeg": [
+        "-c:v",
+        "libvpx",
+        "-deadline",
+        "realtime",
+        "-cpu-used",
+        "8",
+        "-crf",
+        "10",
+        "-b:v",
+        "1M",
+        "-c:a",
+        "libvorbis",
+        "-q:a",
+        "5"
+      ]
+    },
+    "avi": {
+      "label": "AVI",
+      "kind": "video",
+      "accepts": [
+        "video",
+        "animatedImage"
+      ],
+      "ffmpeg": [
+        "-c:v",
+        "mpeg4",
+        "-vtag",
+        "xvid",
+        "-qscale:v",
+        "11",
+        "-c:a",
+        "libmp3lame",
+        "-qscale:a",
+        "2"
+      ]
+    },
+    "ogv": {
+      "label": "OGV",
+      "kind": "video",
+      "accepts": [
+        "video",
+        "animatedImage"
+      ],
+      "ffmpeg": [
+        "-c:v",
+        "libtheora",
+        "-qscale:v",
+        "7",
+        "-c:a",
+        "libvorbis",
+        "-q:a",
+        "5"
+      ],
+      "web": false
+    },
+    "gif": {
+      "label": "GIF",
+      "kind": "animated",
+      "accepts": [
+        "image",
+        "video",
+        "animatedImage"
+      ],
+      "gif": {
+        "fps": 15
+      }
+    },
+    "mp3": {
+      "label": "MP3",
+      "kind": "audio",
+      "accepts": [
+        "audio",
+        "video"
+      ],
+      "ffmpeg": [
+        "-vn",
+        "-c:a",
+        "libmp3lame",
+        "-q:a",
+        "2",
+        "-id3v2_version",
+        "3"
+      ]
+    },
+    "aac": {
+      "label": "AAC",
+      "kind": "audio",
+      "accepts": [
+        "audio",
+        "video"
+      ],
+      "ffmpeg": [
+        "-vn",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "128k"
+      ]
+    },
+    "ogg": {
+      "label": "OGG",
+      "kind": "audio",
+      "accepts": [
+        "audio",
+        "video"
+      ],
+      "ffmpeg": [
+        "-vn",
+        "-c:a",
+        "libvorbis",
+        "-q:a",
+        "5"
+      ]
+    },
+    "flac": {
+      "label": "FLAC",
+      "kind": "audio",
+      "accepts": [
+        "audio",
+        "video"
+      ],
+      "ffmpeg": [
+        "-vn",
+        "-c:a",
+        "flac",
+        "-compression_level",
+        "12"
+      ]
+    },
+    "wav": {
+      "label": "WAV",
+      "kind": "audio",
+      "accepts": [
+        "audio",
+        "video"
+      ],
+      "ffmpeg": [
+        "-vn",
+        "-c:a",
+        "pcm_s16le"
+      ]
+    },
+    "jpg": {
+      "label": "JPG",
+      "kind": "image",
+      "accepts": [
+        "image",
+        "document",
+        "animatedImage"
+      ],
+      "image": {
+        "mime": "image/jpeg",
+        "quality": 90
+      }
+    },
+    "png": {
+      "label": "PNG",
+      "kind": "image",
+      "accepts": [
+        "image",
+        "document",
+        "animatedImage"
+      ],
+      "image": {
+        "mime": "image/png",
+        "quality": 95
+      }
+    },
+    "webp": {
+      "label": "WEBP",
+      "kind": "image",
+      "accepts": [
+        "image",
+        "document",
+        "animatedImage"
+      ],
+      "image": {
+        "mime": "image/webp",
+        "quality": 40
+      }
+    },
+    "avif": {
+      "label": "AVIF",
+      "kind": "image",
+      "accepts": [
+        "image",
+        "document",
+        "animatedImage"
+      ],
+      "image": {
+        "mime": "image/avif",
+        "quality": 50
+      },
+      "web": false
+    },
+    "ico": {
+      "label": "ICO",
+      "kind": "image",
+      "accepts": [
+        "image",
+        "document",
+        "animatedImage"
+      ],
+      "image": {
+        "mime": "image/x-icon",
+        "quality": 95,
+        "maxSize": 256
+      }
+    },
+    "pdf": {
+      "label": "PDF",
+      "kind": "document",
+      "accepts": [
+        "image",
+        "document"
+      ],
+      "image": {
+        "mime": "application/pdf",
+        "quality": 95,
+        "densityDpi": 200
+      },
+      "web": false
+    }
+  }
+}
