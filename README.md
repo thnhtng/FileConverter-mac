@@ -12,6 +12,19 @@ This is an internal/unofficial build, not affiliated with the upstream
 project. No notarized/Developer-ID release — see "Install" below for what
 that means in practice.
 
+## Use it everywhere
+
+One converter, four front ends, all driven by the same format table
+(`shared/formats.json`, kept in sync with the Swift engine by
+`SharedFormatsTests`):
+
+| Where | How | Code |
+|---|---|---|
+| **Web** | Drop files on a page, pick a format, download. Runs in the browser (canvas for images, ffmpeg.wasm for audio/video/GIF) — nothing is uploaded. | `web/`, `scripts/build-web.sh`, deployed by `.github/workflows/pages.yml` |
+| **Browser extension** | Right-click an image/video/audio on any page → *Download as MP4 / GIF / MP3 / JPG / PNG / WEBP…*; popup lists every media file on the page. Chrome/Edge/Brave/Arc/Opera; Safari via Xcode. Protected streams (YouTube etc.) are deliberately not supported. | `extension/` — see `extension/README.md` |
+| **macOS** | Right-click in Finder → Quick Actions → *Convert to MP4 / MP3 / JPG…* (one click), *Convert with File Converter* (preset picker), *Check with File Converter* (Spec Check). | this app + `install.sh` |
+| **Windows** | Right-click in Explorer → *Convert with File Converter* → format. `irm https://raw.githubusercontent.com/thnhtng/FileConverter-mac/main/windows/install.ps1 \| iex` | `windows/` — see `windows/README.md` |
+
 ## Install
 
 One command installs Homebrew (if needed), ffmpeg/ImageMagick/LibreOffice,

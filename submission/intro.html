@@ -73,6 +73,7 @@ section.soft { background: var(--soft); }
 h2 { font-size: clamp(26px, 3.4vw, 34px); line-height: 1.2; margin: 6px 0 12px; letter-spacing: -.015em; }
 .lede { color: var(--muted); font-size: 17px; max-width: 720px; margin: 0 0 32px; }
 .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
 .card h3 { font-size: 17px; margin: 8px 0 6px; }
@@ -130,13 +131,13 @@ footer { padding: 32px 0 48px; color: var(--faint); font-size: 13px; border-top:
 
 @media (max-width: 880px) {
   .hero .wrap, .theme, .calc, .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); }
-  .flow, .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow, .stats, .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hero { padding: 40px 0 32px; }
   section { padding: 44px 0; }
 }
 @media (max-width: 520px) {
   .wrap { padding: 0 16px; }
-  .flow { grid-template-columns: minmax(0, 1fr); }
+  .flow, .grid4 { grid-template-columns: minmax(0, 1fr); }
   .nav-cta { display: none; }
   .rows { grid-template-columns: 15px 1fr auto; margin-left: 0; }
   .rows .e { display: none; }
@@ -211,6 +212,19 @@ footer { padding: 32px 0 48px; color: var(--faint); font-size: 13px; border-top:
   </div>
   <p class="assume" data-i18n="rulesTitle" style="margin-top:28px;font-weight:600;color:var(--muted)"></p>
   <div class="rules" id="rules"></div>
+</div></section>
+
+<section id="everywhere"><div class="wrap">
+  <div class="tag" data-i18n="eTag"></div>
+  <h2 data-i18n="eTitle"></h2>
+  <p class="lede" data-i18n="eLede"></p>
+  <div class="grid4">
+    <div class="card"><div class="ico">🌐</div><h3 data-i18n="e1t"></h3><p data-i18n="e1"></p></div>
+    <div class="card"><div class="ico">🧩</div><h3 data-i18n="e2t"></h3><p data-i18n="e2"></p></div>
+    <div class="card"><div class="ico">⌘</div><h3 data-i18n="e3t"></h3><p data-i18n="e3"></p></div>
+    <div class="card"><div class="ico">⊞</div><h3 data-i18n="e4t"></h3><p data-i18n="e4"></p></div>
+  </div>
+  <p class="assume" data-i18n="eNote"></p>
 </div></section>
 
 <section id="theme"><div class="wrap">
@@ -290,6 +304,13 @@ const STR = {
     s5t: "Báo cáo", s5: "Xuất HTML (Slack/email) hoặc CSV (bảng tính) cho người làm file.",
     rulesTitle: "10 quy tắc được kiểm tra:",
     rules: ["Loại file", "Định dạng", "Dung lượng", "Kích thước", "Tỉ lệ khung", "Thời lượng", "Tốc độ khung hình", "Codec video", "Codec âm thanh", "Track âm thanh"],
+    eTag: "Dùng ở mọi nơi", eTitle: "Một bộ chuyển đổi — bốn cách dùng",
+    eLede: "Cùng một bảng định dạng và chất lượng mặc định (shared/formats.json, có test tự động giữ đồng bộ), nên file chuyển ở đâu cũng ra giống nhau.",
+    e1t: "Trang web", e1: "Thả file vào trang, chọn đuôi, tải về. Chạy ngay trong trình duyệt (ffmpeg.wasm + canvas), không tải file lên server.",
+    e2t: "Extension trình duyệt", e2: "Chuột phải vào ảnh/video trên bất kỳ trang nào → tải và chuyển đuôi luôn. Popup liệt kê mọi media của trang. Chrome, Edge, Brave; Safari qua Xcode.",
+    e3t: "Mac — Quick Action", e3: "Chuột phải trong Finder → \"Convert to MP4 / MP3 / JPG…\" chuyển ngay; chỉ hiện đuôi hợp với file. Kèm app và Spec Check.",
+    e4t: "Windows — menu chuột phải", e4: "Chuột phải trong Explorer → \"Convert with File Converter\" → chọn đuôi. Một lệnh PowerShell để cài, không cần quyền admin.",
+    eNote: "Extension chỉ tải media có file thật trên trang; không hỗ trợ YouTube và các trang stream có bảo vệ (theo điều khoản của họ và chính sách Chrome Web Store).",
     tTag: "Chủ đề", tTitle: "Gắn với chủ đề chung của AX Hero",
     tLede: "Trọng tâm là chủ đề #2, với AI hỗ trợ đúng chỗ con người tốn công nhất: đọc spec dài dòng.",
     t1tag: "Chủ đề #2", t1t: "Tìm lỗi trong sản phẩm công việc", t1: "Đối chiếu sản phẩm (file media) với tiêu chuẩn (spec), đánh dấu điểm khác biệt để con người chỉ kiểm tra những chỗ đó.",
@@ -334,6 +355,13 @@ const STR = {
     s5t: "리포트", s5: "HTML(슬랙/메일) 또는 CSV(스프레드시트)로 파일 제작자에게 전달합니다.",
     rulesTitle: "검사하는 10가지 규칙:",
     rules: ["미디어 유형", "파일 형식", "파일 용량", "해상도", "화면 비율", "길이", "프레임 레이트", "비디오 코덱", "오디오 코덱", "오디오 트랙"],
+    eTag: "어디서나 사용", eTitle: "하나의 변환기, 네 가지 사용법",
+    eLede: "같은 형식표와 기본 품질(shared/formats.json, 자동 테스트로 동기화)을 쓰기 때문에 어디서 변환해도 결과가 같습니다.",
+    e1t: "웹 페이지", e1: "파일을 놓고 형식을 고른 뒤 다운로드. 브라우저 안에서(ffmpeg.wasm + canvas) 처리하며 서버로 업로드하지 않습니다.",
+    e2t: "브라우저 확장 프로그램", e2: "어느 페이지에서든 이미지/영상 우클릭 → 다운로드하면서 바로 변환. 팝업에서 페이지의 모든 미디어 확인. Chrome, Edge, Brave · Safari는 Xcode로.",
+    e3t: "Mac — 빠른 동작", e3: "Finder 우클릭 → \"Convert to MP4 / MP3 / JPG…\"로 즉시 변환, 파일에 맞는 형식만 표시. 앱과 Spec Check 포함.",
+    e4t: "Windows — 우클릭 메뉴", e4: "탐색기 우클릭 → \"Convert with File Converter\" → 형식 선택. PowerShell 명령 한 줄로 설치, 관리자 권한 불필요.",
+    eNote: "확장 프로그램은 페이지에 실제 파일로 있는 미디어만 다운로드합니다. YouTube 등 보호된 스트리밍 사이트는 약관과 Chrome 웹 스토어 정책에 따라 지원하지 않습니다.",
     tTag: "주제", tTitle: "AX Hero 공통 주제와의 연결",
     tLede: "핵심은 2번 주제이며, 사람이 가장 수고스러운 부분인 긴 스펙 문서 읽기를 AI가 돕습니다.",
     t1tag: "주제 #2", t1t: "업무 산출물에서 오류 찾기", t1: "산출물(미디어 파일)을 기준(스펙)과 대조해 차이를 표시하고, 사람은 그 부분만 확인합니다.",
@@ -378,6 +406,13 @@ const STR = {
     s5t: "Report", s5: "Export HTML (Slack/email) or CSV (spreadsheets) for whoever made the files.",
     rulesTitle: "The 10 rules it checks:",
     rules: ["Media type", "File format", "File size", "Dimensions", "Aspect ratio", "Duration", "Frame rate", "Video codec", "Audio codec", "Audio track"],
+    eTag: "Use it everywhere", eTitle: "One converter, four ways to use it",
+    eLede: "The same format table and quality defaults (shared/formats.json, kept in sync by automated tests), so a file converts the same wherever you convert it.",
+    e1t: "Web page", e1: "Drop files on the page, pick a format, download. Runs in the browser (ffmpeg.wasm + canvas) — nothing is uploaded.",
+    e2t: "Browser extension", e2: "Right-click an image or video on any page → download it already converted. The popup lists every media file on the page. Chrome, Edge, Brave; Safari via Xcode.",
+    e3t: "Mac — Quick Actions", e3: "Right-click in Finder → \"Convert to MP4 / MP3 / JPG…\" converts right away; only formats that fit the file appear. Includes the app and Spec Check.",
+    e4t: "Windows — right-click menu", e4: "Right-click in Explorer → \"Convert with File Converter\" → pick a format. One PowerShell command to install, no admin rights.",
+    eNote: "The extension downloads media that exists as real files on the page; YouTube and other protected streaming sites aren't supported (their terms and Chrome Web Store policy).",
     tTag: "Theme", tTitle: "How it maps to the AX Hero themes",
     tLede: "The core is theme #2, with AI helping exactly where people spend the most effort: reading long spec documents.",
     t1tag: "Theme #2", t1t: "Find errors in work products", t1: "Compare the work product (media files) with the standard (spec) and flag the differences, so people only check those spots.",
