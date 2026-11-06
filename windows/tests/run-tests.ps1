@@ -151,9 +151,14 @@ if ($ffmpeg -and $ffprobe) {
     if ($magick) {
         $png = Join-Path $tmp 'shot.png'
         & $ffmpeg.Source -v error -y -f lavfi -i 'color=c=red:s=300x200' -frames:v 1 $png
-        foreach ($case in @(@('jpg', 'mjpeg'), @('webp', 'webp'), @('ico', 'png'))) {
+        foreach ($case in @(@('jpg', '^mjpeg'), @('webp', '^webp'))) {
             $to = $case[0]; $want = $case[1]
-            Check "png -> $to" { (Probe (Invoke-FcPlan -Plan (Get-FcPlan -Formats $formats -InputPath $png -To $to -Tools $tools))) -like "$want*" }
+            Check "png -> $to" { (Probe (Invoke-FcPlan -Plan (Get-FcPlan -Formats $formats -InputPath $png -To $to -Tools $tools))) -match $want }
+        }
+        # ICO entries are PNG or BMP depending on ImageMagick version/size; both are valid.
+        Check 'png -> ico (multi-size)' {
+            $codecs = @((Probe (Invoke-FcPlan -Plan (Get-FcPlan -Formats $formats -InputPath $png -To ico -Tools $tools))) -split ',' | Where-Object { $_ })
+            ($codecs.Count -ge 2) -and (@($codecs | Where-Object { $_ -notmatch '^(png|bmp)$' }).Count -eq 0)
         }
     }
     Check 'fc-convert.ps1 end to end (-Quiet)' {
