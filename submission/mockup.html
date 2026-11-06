@@ -162,6 +162,32 @@ textarea { width: 100%; min-height: 190px; resize: vertical; font-family: var(--
 
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--text); color: var(--window); padding: 9px 16px; border-radius: 10px; font-size: 13px; z-index: 40; box-shadow: var(--shadow); max-width: calc(100vw - 32px); }
 
+/* Extension demo */
+.ext-stage { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+.ext-page { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); position: relative; min-height: 360px; }
+.ext-url { font-size: 12px; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--window); }
+.ext-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 12px; }
+.ext-tile { aspect-ratio: 16 / 10; border-radius: 10px; display: grid; place-items: center; color: #fff; font-size: 26px; }
+.ext-menu { position: absolute; right: 18px; bottom: 16px; font-size: 12.5px; }
+.ext-menu-title { color: var(--muted); margin-bottom: 4px; font-size: 12px; background: var(--window); padding: 2px 8px; border-radius: 6px; display: inline-block; }
+.ext-menu-box { background: var(--window); border: 1px solid var(--line-strong); border-radius: 8px; box-shadow: var(--shadow); padding: 4px; min-width: 190px; }
+.ext-menu-box div { padding: 4px 10px; border-radius: 5px; }
+.ext-menu-box div:first-child { font-weight: 600; border-bottom: 1px solid var(--line); border-radius: 0; margin-bottom: 2px; }
+.ext-popup { border: 1px solid var(--line-strong); border-radius: 12px; background: var(--window); box-shadow: var(--shadow); padding: 10px; display: grid; gap: 8px; }
+.ext-pop-head { display: flex; gap: 10px; align-items: center; }
+.ext-filters { display: flex; gap: 4px; }
+.ext-filters button { border: 0; background: var(--panel); border-radius: 999px; padding: 3px 10px; font-size: 12px; color: var(--muted); }
+.ext-filters button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.ext-item { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 10px; align-items: center; }
+.ext-thumb { width: 54px; height: 40px; border-radius: 6px; }
+.ext-info b { font-size: 13px; }
+.ext-ctl { display: flex; gap: 6px; margin-top: 3px; align-items: center; flex-wrap: wrap; font-size: 12px; }
+.ext-ctl .btn { padding: 3px 9px; font-size: 12px; }
+.ext-ctl select { padding: 3px 6px; font-size: 12px; }
+.ext-blocked { color: var(--warn); font-size: 12px; }
+.ext-yt { border-top: 1px solid var(--line); padding-top: 8px; }
+@media (max-width: 720px) { .ext-stage { grid-template-columns: minmax(0, 1fr); } .ext-menu { position: static; padding: 0 12px 12px; } }
+
 @media (max-width: 720px) {
   .topbar { padding: 12px 16px; flex-wrap: wrap; }
   .lead { padding: 0 16px; }
@@ -212,6 +238,7 @@ const STR = {
   vi: {
     demoBadge: "Bản mockup · dữ liệu mẫu",
     lead: "Mô phỏng ứng dụng macOS File Converter với tính năng mới Spec Check: kiểm tra file trước khi gửi đi, chỉ ra đúng chỗ sai và sửa tự động. Mọi nút đều bấm được; không kết nối server hay AI API thật.",
+    tabExt: "Extension trình duyệt", extIntro: "Mô phỏng extension: mở popup trên một trang bất kỳ, chọn ảnh/video và đuôi muốn ra — file tải về đã được chuyển sẵn.", extPage: "Trang đang xem", extPopupSub: "Tải & chuyển đổi media trên trang này", extAll: "Tất cả", extImages: "Ảnh", extVideos: "Video", extDownload: "Tải", extConvert: "Chuyển sang…", extSaved: "Đã lưu {name}", extProtected: "Stream được bảo vệ — không tải được", extWorking: "Đang tải & chuyển… {p}%", extMenuTitle: "Chuột phải vào ảnh/video:", extMenuAs: "Tải & chuyển sang {f}", extYtNote: "YouTube và trang stream có bảo vệ: không hỗ trợ (điều khoản của trang và chính sách Chrome Web Store).",
     tabCheck: "Kiểm tra spec", tabPresets: "Preset chuyển đổi", tabSettings: "Cài đặt",
     checkAgainst: "Kiểm tra theo", manage: "Quản lý spec…", fixBy: "Sửa bằng", fitPad: "Thêm viền", fitCrop: "Cắt khung",
     fitHelp: "Cách sửa sai kích thước/tỉ lệ: thêm viền đen (không mất nội dung) hoặc cắt bớt mép.",
@@ -269,6 +296,7 @@ const STR = {
   ko: {
     demoBadge: "목업 · 샘플 데이터",
     lead: "macOS 앱 File Converter의 신규 기능 Spec Check를 체험해 보는 목업입니다. 파일을 보내기 전에 스펙과 비교해 틀린 부분만 정확히 짚어 주고, 자동으로 수정합니다. 모든 버튼이 동작하며 실제 서버나 AI API에는 연결하지 않습니다.",
+    tabExt: "브라우저 확장", extIntro: "확장 프로그램 데모: 아무 페이지에서 팝업을 열고 이미지/영상과 형식을 고르면 변환된 파일로 다운로드됩니다.", extPage: "보고 있는 페이지", extPopupSub: "이 페이지의 미디어 다운로드 · 변환", extAll: "전체", extImages: "이미지", extVideos: "영상", extDownload: "다운로드", extConvert: "변환…", extSaved: "{name} 저장됨", extProtected: "보호된 스트림 — 다운로드 불가", extWorking: "다운로드·변환 중… {p}%", extMenuTitle: "이미지/영상 우클릭:", extMenuAs: "{f}(으)로 다운로드", extYtNote: "YouTube 등 보호된 스트리밍 사이트는 지원하지 않습니다 (사이트 약관 및 Chrome 웹 스토어 정책).",
     tabCheck: "스펙 체크", tabPresets: "변환 프리셋", tabSettings: "설정",
     checkAgainst: "기준 스펙", manage: "스펙 관리…", fixBy: "수정 방식", fitPad: "여백 추가", fitCrop: "잘라내기",
     fitHelp: "해상도·비율이 다를 때: 검은 여백을 넣거나(잘리는 부분 없음) 가장자리를 잘라냅니다.",
@@ -323,6 +351,7 @@ const STR = {
   en: {
     demoBadge: "Mockup · sample data",
     lead: "A clickable mockup of the File Converter macOS app's new Spec Check feature: check files before you send them, see exactly what's wrong, and fix it automatically. Every button works; nothing talks to a real server or AI API.",
+    tabExt: "Browser extension", extIntro: "Extension demo: open the popup on any page, pick an image or video and a format — the download arrives already converted.", extPage: "Page you're viewing", extPopupSub: "Download & convert media on this page", extAll: "All", extImages: "Images", extVideos: "Videos", extDownload: "Download", extConvert: "Convert to…", extSaved: "Saved {name}", extProtected: "Protected stream — can't be downloaded", extWorking: "Downloading & converting… {p}%", extMenuTitle: "Right-click an image/video:", extMenuAs: "Download as {f}", extYtNote: "YouTube and protected streaming sites aren't supported (their terms and Chrome Web Store policy).",
     tabCheck: "Spec Check", tabPresets: "Presets", tabSettings: "Settings",
     checkAgainst: "Check against", manage: "Manage specs…", fixBy: "Fix by", fitPad: "Adding bars", fitCrop: "Cropping",
     fitHelp: "How to fix a wrong size or ratio: add black bars (nothing is cut off) or crop the edges.",
@@ -678,9 +707,9 @@ function render() {
   document.documentElement.lang = lang;
   document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
   document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
-  const tabs = [["check", "tabCheck"], ["presets", "tabPresets"], ["settings", "tabSettings"]];
+  const tabs = [["check", "tabCheck"], ["ext", "tabExt"], ["presets", "tabPresets"], ["settings", "tabSettings"]];
   document.getElementById("tabs").innerHTML = tabs.map(([id, k]) => '<button type="button" role="tab" data-tab="' + id + '" aria-pressed="' + (state.tab === id) + '">' + esc(t(k)) + "</button>").join("");
-  view.innerHTML = state.tab === "check" ? renderCheck() : state.tab === "presets" ? renderPresets() : renderSettings();
+  view.innerHTML = state.tab === "check" ? renderCheck() : state.tab === "ext" ? renderExt() : state.tab === "presets" ? renderPresets() : renderSettings();
   renderModal();
 }
 
@@ -790,6 +819,48 @@ function renderSettings() {
     "</div></div></div>";
 }
 
+/* ------------------------------------------------------------------ extension demo */
+const EXT_MEDIA = [
+  { id: 1, name: "hero-banner.jpg", kind: "image", meta: "1920×1080", bg: "linear-gradient(135deg,#f97316,#ec4899)", targets: ["png", "webp", "jpg", "ico"] },
+  { id: 2, name: "product-shot.png", kind: "image", meta: "1200×1200", bg: "linear-gradient(135deg,#22c55e,#14b8a6)", targets: ["jpg", "webp", "gif", "ico"] },
+  { id: 3, name: "teaser.mp4", kind: "video", meta: "1280×720 · 12 s", bg: "linear-gradient(135deg,#6366f1,#0ea5e9)", targets: ["gif", "webm", "mp3", "mp4"] },
+  { id: 4, name: "stream (blob)", kind: "video", meta: "1920×1080", bg: "linear-gradient(135deg,#475569,#94a3b8)", targets: [], blocked: true },
+];
+state.ext = { filter: "all", jobs: {} };
+function renderExt() {
+  const f = state.ext.filter;
+  const items = EXT_MEDIA.filter((m) => f === "all" || m.kind === f);
+  const page = '<div class="ext-page"><div class="ext-url">🔒 example-shop.com/new-collection</div><div class="ext-grid">' +
+    EXT_MEDIA.map((m) => '<div class="ext-tile" style="background:' + m.bg + '">' + (m.kind === "video" ? "▶" : "") + "</div>").join("") + "</div>" +
+    '<div class="ext-menu"><div class="ext-menu-title">' + esc(t("extMenuTitle")) + '</div><div class="ext-menu-box"><div>File Converter ▸</div>' +
+    ["PNG", "JPG", "WEBP", "GIF"].map((x) => "<div>" + esc(t("extMenuAs", { f: x })) + "</div>").join("") + "</div></div></div>";
+  const popup = '<div class="ext-popup"><div class="ext-pop-head"><span class="brand-mark" style="width:22px;height:22px;font-size:12px">⇄</span><div><b>File Converter</b><div class="notes">' + esc(t("extPopupSub")) + '</div></div></div>' +
+    '<div class="ext-filters">' + [["all", "extAll"], ["image", "extImages"], ["video", "extVideos"]].map(([k, l]) => '<button type="button" data-extfilter="' + k + '" aria-pressed="' + (f === k) + '">' + esc(t(l)) + "</button>").join("") + "</div>" +
+    items.map((m) => {
+      const job = state.ext.jobs[m.id];
+      let ctl;
+      if (m.blocked) ctl = '<span class="ext-blocked">🔒 ' + esc(t("extProtected")) + "</span>";
+      else if (job && job.p < 1) ctl = '<span class="notes">' + esc(t("extWorking", { p: Math.round(job.p * 100) })) + "</span>";
+      else if (job) ctl = '<span class="ok-text">✓ ' + esc(t("extSaved", { name: job.name })) + "</span>";
+      else ctl = '<button type="button" class="btn" data-extdl="' + m.id + '">' + esc(t("extDownload")) + '</button><select data-extconv="' + m.id + '"><option value="">' + esc(t("extConvert")) + "</option>" + m.targets.map((x) => '<option value="' + x + '">' + x.toUpperCase() + "</option>").join("") + "</select>";
+      return '<div class="ext-item"><div class="ext-thumb" style="background:' + m.bg + '"></div><div class="ext-info"><b>' + esc(m.name) + '</b><div class="notes">' + esc(m.meta) + '</div><div class="ext-ctl">' + ctl + "</div></div></div>";
+    }).join("") + '<div class="notes ext-yt">' + esc(t("extYtNote")) + "</div></div>";
+  return '<div class="pane"><p class="muted">' + esc(t("extIntro")) + '</p><div class="ext-stage">' + page + popup + "</div></div>";
+}
+function runExtJob(id, to) {
+  const m = EXT_MEDIA.find((x) => x.id === id);
+  const name = to ? m.name.replace(/\.[^.]+$/, "") + "." + to : m.name;
+  const job = { p: 0, name };
+  state.ext.jobs[id] = job;
+  const started = performance.now(), total = to ? 1500 : 500;
+  const tick = () => {
+    job.p = Math.min(1, (performance.now() - started) / total);
+    if (state.tab === "ext") render();
+    if (job.p < 1) setTimeout(tick, 120); else toast(t("extSaved", { name }));
+  };
+  tick();
+}
+
 /* ------------------------------------------------------------------ modals */
 const modalRoot = document.getElementById("modal-root");
 function renderModal() {
@@ -885,6 +956,8 @@ document.addEventListener("click", (e) => {
   if (d.remove) { state.items = state.items.filter((i) => i.id !== +d.remove); render(); return; }
   if (d.toggle) { state.showAll[d.toggle] = !state.showAll[d.toggle]; render(); return; }
   if (d.libsel) { state.libSel = d.libsel; render(); return; }
+  if (d.extfilter) { state.ext.filter = d.extfilter; render(); return; }
+  if (d.extdl) { runExtJob(+d.extdl, ""); return; }
   const act = d.act;
   if (act !== "menu" && state.menuOpen) state.menuOpen = false;
   switch (act) {
@@ -917,6 +990,7 @@ document.addEventListener("click", (e) => {
 document.addEventListener("change", (e) => {
   const el = e.target;
   if (el.id === "spec-select") { selectSpec(el.value); render(); return; }
+  if (el.dataset.extconv && el.value) { runExtJob(+el.dataset.extconv, el.value); return; }
   if (el.dataset.setting === "quit") { state.settings.quit = el.checked; return; }
   if (el.dataset.kind) {
     const s = state.specs.find((x) => x.id === state.libSel); if (!s) return;
