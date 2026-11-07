@@ -7,15 +7,35 @@ public struct AppSettings: Codable, Equatable, Sendable {
     public var maximumSimultaneousConversions: Int
     public var exitApplicationWhenConversionsFinished: Bool
     public var presets: [ConversionPreset]
+    /// Spec Check delivery specs. Seeded with `DefaultSpecs.all`.
+    public var deliverySpecs: [DeliverySpec]
 
     public init(
         maximumSimultaneousConversions: Int = max(1, ProcessInfo.processInfo.activeProcessorCount / 2),
         exitApplicationWhenConversionsFinished: Bool = true,
-        presets: [ConversionPreset] = DefaultPresets.builtInPresetSet()
+        presets: [ConversionPreset] = DefaultPresets.builtInPresetSet(),
+        deliverySpecs: [DeliverySpec] = DefaultSpecs.all
     ) {
         self.maximumSimultaneousConversions = maximumSimultaneousConversions
         self.exitApplicationWhenConversionsFinished = exitApplicationWhenConversionsFinished
         self.presets = presets
+        self.deliverySpecs = deliverySpecs
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case maximumSimultaneousConversions, exitApplicationWhenConversionsFinished, presets, deliverySpecs
+    }
+
+    /// Custom decode so settings.json files written before Spec Check
+    /// existed (no `deliverySpecs` key) still load, picking up the defaults.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            maximumSimultaneousConversions: try c.decode(Int.self, forKey: .maximumSimultaneousConversions),
+            exitApplicationWhenConversionsFinished: try c.decode(Bool.self, forKey: .exitApplicationWhenConversionsFinished),
+            presets: try c.decode([ConversionPreset].self, forKey: .presets),
+            deliverySpecs: try c.decodeIfPresent([DeliverySpec].self, forKey: .deliverySpecs) ?? DefaultSpecs.all
+        )
     }
 }
 

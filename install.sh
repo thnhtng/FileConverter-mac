@@ -108,7 +108,6 @@ xattr -cr "/Applications/$APP_NAME" 2>/dev/null || true
 # requirement applies.
 QUICK_ACTION_ID="io.file-converter.mac.QuickAction"
 QUICK_ACTION_PATH="/Applications/$APP_NAME/Contents/PlugIns/File Converter Quick Action.appex"
-QUICK_ACTION_WORKFLOW="$HOME/Library/Services/Convert with File Converter.workflow"
 
 pluginkit -D -m -v -i "$QUICK_ACTION_ID" 2>/dev/null | awk -F'\t' 'NF>1{print $NF}' | while IFS= read -r existing; do
     [[ "$existing" == "$QUICK_ACTION_PATH" ]] || pluginkit -r "$existing" 2>/dev/null || true
@@ -116,11 +115,23 @@ done
 pluginkit -a "$QUICK_ACTION_PATH" 2>/dev/null || true
 pluginkit -e use -i "$QUICK_ACTION_ID" 2>/dev/null || true
 
-log "Installing the Quick Action…"
-rm -rf "$QUICK_ACTION_WORKFLOW"
-mkdir -p "$QUICK_ACTION_WORKFLOW/Contents"
+# Writes one Automator Service. $1 = menu title, $2 = bundle id,
+# $3 = extra CLI args for the app (e.g. "--check "), placed before the files,
+# $4 = space-separated UTIs the service accepts (Finder only shows it when
+# every selected file conforms), default public.item.
+install_service() {
+    local title="$1" bundle_id="$2" extra_args="$3" send_types="${4:-public.item}"
+    local workflow="$HOME/Library/Services/$title.workflow"
+    local send_types_xml="" uti
+    for uti in $send_types; do
+        send_types_xml+="				<string>$uti</string>"$'\n'
+    done
+    send_types_xml="${send_types_xml%$'\n'}"
+    rm -rf "$workflow"
+    mkdir -p "$workflow/Contents"
 
-cat > "$QUICK_ACTION_WORKFLOW/Contents/Info.plist" <<PLIST_EOF
+
+cat > "$workflow/Contents/Info.plist" <<PLIST_EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -131,13 +142,13 @@ cat > "$QUICK_ACTION_WORKFLOW/Contents/Info.plist" <<PLIST_EOF
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>Convert with File Converter</string>
+				<string>$title</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>runWorkflowAsService</string>
 			<key>NSSendFileTypes</key>
 			<array>
-				<string>public.item</string>
+${send_types_xml}
 			</array>
 			<key>NSRequiredContext</key>
 			<dict>
@@ -147,14 +158,14 @@ cat > "$QUICK_ACTION_WORKFLOW/Contents/Info.plist" <<PLIST_EOF
 		</dict>
 	</array>
 	<key>CFBundleIdentifier</key>
-	<string>io.file-converter.mac.quickaction-workflow</string>
+	<string>$bundle_id</string>
 	<key>CFBundleName</key>
-	<string>Convert with File Converter</string>
+	<string>$title</string>
 </dict>
 </plist>
 PLIST_EOF
 
-cat > "$QUICK_ACTION_WORKFLOW/Contents/document.wflow" <<WFLOW_EOF
+cat > "$workflow/Contents/document.wflow" <<WFLOW_EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -216,7 +227,7 @@ cat > "$QUICK_ACTION_WORKFLOW/Contents/document.wflow" <<WFLOW_EOF
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>"/Applications/File Converter.app/Contents/MacOS/File Converter" "\$@"</string>
+					<string>"/Applications/File Converter.app/Contents/MacOS/File Converter" $extra_args"\$@"</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>
@@ -314,8 +325,47 @@ cat > "$QUICK_ACTION_WORKFLOW/Contents/document.wflow" <<WFLOW_EOF
 </dict>
 </plist>
 WFLOW_EOF
+}
+
+log "Installing the Quick Actions…"
+install_service "Convert with File Converter" "io.file-converter.mac.quickaction-workflow" ""
+# Spec Check: opens the selected files in the Spec Check tab instead of
+# converting them (LaunchRequest --check).
+install_service "Check with File Converter" "io.file-converter.mac.check-workflow" "--check "
+
+# One-click formats: right-click -> Quick Actions -> "Convert to MP4" etc.
+# converts straight away with the built-in "To <FORMAT>" preset (no window
+# to pick from). Finder only lists the ones whose file types match the
+# selection, so a photo offers JPG/PNG/WEBP/GIF/PDF and a video offers
+# MP4/WEBM/GIF/MP3/WAV. Choose the set with FC_FORMATS, e.g.
+#   FC_FORMATS="MP4 MP3 JPG" bash install.sh
+UTI_VIDEO="public.movie com.compuserve.gif"
+UTI_AUDIO_VIDEO="public.audio public.movie"
+UTI_IMAGE="public.image com.adobe.pdf"
+UTI_DOCS="public.image com.adobe.pdf com.microsoft.word.doc org.openxmlformats.wordprocessingml.document com.microsoft.excel.xls org.openxmlformats.spreadsheetml.sheet com.microsoft.powerpoint.ppt org.openxmlformats.presentationml.presentation org.oasis-open.opendocument.text org.oasis-open.opendocument.spreadsheet org.oasis-open.opendocument.presentation"
+utis_for_format() {
+    case "$1" in
+        MP4|WEBM|MKV|AVI) echo "$UTI_VIDEO" ;;
+        GIF) echo "public.movie public.image" ;;
+        MP3|WAV|AAC|FLAC|OGG) echo "$UTI_AUDIO_VIDEO" ;;
+        JPG|PNG|WEBP|AVIF|ICO) echo "$UTI_IMAGE" ;;
+        PDF) echo "$UTI_DOCS" ;;
+        *) return 1 ;;
+    esac
+}
+# Remove one-click services from a previous install (the format set may have
+# changed) — only ours, identified by bundle id, never a user's own workflow.
+for old_workflow in "$HOME/Library/Services/Convert to "*.workflow; do
+    [[ -f "$old_workflow/Contents/Info.plist" ]] || continue
+    grep -q "io.file-converter.mac.to-" "$old_workflow/Contents/Info.plist" && rm -rf "$old_workflow"
+done
+for fmt in ${FC_FORMATS:-MP4 WEBM GIF MP3 WAV JPG PNG WEBP PDF}; do
+    fmt="$(echo "$fmt" | tr '[:lower:]' '[:upper:]')"
+    utis="$(utis_for_format "$fmt")" || { log "Skipping unknown format $fmt"; continue; }
+    install_service "Convert to $fmt" "io.file-converter.mac.to-$(echo "$fmt" | tr '[:upper:]' '[:lower:]')" "--preset \"To $fmt\" " "$utis"
+done
 
 /System/Library/CoreServices/pbs -flush 2>/dev/null || true
 killall Finder 2>/dev/null || true
 
-log "Done. Right-click any supported file in Finder → Quick Actions → \"Convert with File Converter\""
+log "Done. Right-click any supported file in Finder → Quick Actions → \"Convert to MP4 / MP3 / JPG…\", \"Convert with File Converter\" or \"Check with File Converter\""

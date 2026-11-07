@@ -37,8 +37,8 @@ public enum FFmpegArgumentBuilder {
 
         case .avi:
             guard let video = preset.settings.video else { throw FFmpegArgumentBuilderError.missingSettings }
-            let transform = FFmpegTransform(scale: video.scale, rotationDegrees: video.rotationDegrees)
-            var args = baseArgs + ["-i", input, "-c:v", "mpeg4", "-vtag", "xvid",
+            let transform = FFmpegTransform(video: video)
+            var args = baseArgs + ["-i", input] + silentAudioInputArgs(video) + ["-c:v", "mpeg4", "-vtag", "xvid",
                                     "-qscale:v", "\(FFmpegQualityFormulas.mpeg4QualityIndex(quality: video.quality))"]
             if video.enableAudio {
                 guard let mp3Index = FFmpegQualityFormulas.mp3VBRQualityIndex(bitrateKbps: video.audioBitrateKbps) else {
@@ -49,6 +49,7 @@ public enum FFmpegArgumentBuilder {
                 args.append("-an")
             }
             if let filter = transform.filterGraph() { args += ["-vf", filter] }
+            args += specFixOutputArgs(video)
             args += mp3MetadataArgs
             args.append(output)
             return [FFmpegPass(arguments: args)]
@@ -100,11 +101,14 @@ public enum FFmpegArgumentBuilder {
 
         case .mkv, .mp4:
             guard let video = preset.settings.video else { throw FFmpegArgumentBuilderError.missingSettings }
-            let transform = FFmpegTransform(scale: video.scale, rotationDegrees: video.rotationDegrees, forceEvenDimensionsAndYUV420P: true)
-            var args = baseArgs + ["-i", input,
+            let transform = FFmpegTransform(video: video, forceEvenDimensionsAndYUV420P: true)
+            var args = baseArgs + ["-i", input] + silentAudioInputArgs(video) + [
                                     "-c:v", "libx264",
                                     "-preset", FFmpegQualityFormulas.h264Preset(video.encodingSpeed),
                                     "-crf", "\(FFmpegQualityFormulas.h264CRF(quality: video.quality))"]
+            if let cap = video.maxVideoBitrateKbps, cap > 0 {
+                args += ["-maxrate", "\(cap)k", "-bufsize", "\(cap * 2)k"]
+            }
             if video.enableAudio {
                 guard let aacIndex = FFmpegQualityFormulas.aacQualityIndex(bitrateKbps: video.audioBitrateKbps) else {
                     throw FFmpegArgumentBuilderError.unrecognizedBitrate(video.audioBitrateKbps)
@@ -114,6 +118,12 @@ public enum FFmpegArgumentBuilder {
                 args.append("-an")
             }
             if let filter = transform.filterGraph() { args += ["-vf", filter] }
+            args += specFixOutputArgs(video)
+            if preset.outputType == .mp4 && video.frameTarget != nil {
+                // Delivery targets (ad networks, CMS uploads) commonly want
+                // the moov atom up front for progressive playback.
+                args += ["-movflags", "+faststart"]
+            }
             args.append(output)
             return [FFmpegPass(arguments: args)]
 
@@ -129,8 +139,8 @@ public enum FFmpegArgumentBuilder {
 
         case .ogv:
             guard let video = preset.settings.video else { throw FFmpegArgumentBuilderError.missingSettings }
-            let transform = FFmpegTransform(scale: video.scale, rotationDegrees: video.rotationDegrees)
-            var args = baseArgs + ["-i", input, "-codec:v", "libtheora",
+            let transform = FFmpegTransform(video: video)
+            var args = baseArgs + ["-i", input] + silentAudioInputArgs(video) + ["-codec:v", "libtheora",
                                     "-qscale:v", "\(FFmpegQualityFormulas.theoraQualityIndex(quality: video.quality))"]
             if video.enableAudio {
                 guard let idx = FFmpegQualityFormulas.oggVBRQualityIndex(bitrateKbps: video.audioBitrateKbps) else {
@@ -141,6 +151,7 @@ public enum FFmpegArgumentBuilder {
                 args.append("-an")
             }
             if let filter = transform.filterGraph() { args += ["-vf", filter] }
+            args += specFixOutputArgs(video)
             args.append(output)
             return [FFmpegPass(arguments: args)]
 
@@ -153,9 +164,12 @@ public enum FFmpegArgumentBuilder {
 
         case .webm:
             guard let video = preset.settings.video else { throw FFmpegArgumentBuilderError.missingSettings }
-            let transform = FFmpegTransform(scale: video.scale, rotationDegrees: video.rotationDegrees)
-            var args = baseArgs + ["-i", input, "-c:v", "libvpx-vp9"]
-            if video.quality == 63 {
+            let transform = FFmpegTransform(video: video)
+            var args = baseArgs + ["-i", input] + silentAudioInputArgs(video) + ["-c:v", "libvpx-vp9"]
+            if let cap = video.maxVideoBitrateKbps, cap > 0 {
+                // VP9 "constrained quality": CRF with a bitrate ceiling.
+                args += ["-crf", "\(FFmpegQualityFormulas.webmCRF(quality: video.quality))", "-b:v", "\(cap)k"]
+            } else if video.quality == 63 {
                 args += ["-lossless", "1"]
             } else {
                 args += ["-crf", "\(FFmpegQualityFormulas.webmCRF(quality: video.quality))", "-b:v", "0"]
@@ -169,6 +183,7 @@ public enum FFmpegArgumentBuilder {
                 args.append("-an")
             }
             if let filter = transform.filterGraph() { args += ["-vf", filter] }
+            args += specFixOutputArgs(video)
             args.append(output)
             return [FFmpegPass(arguments: args)]
 
@@ -182,6 +197,26 @@ public enum FFmpegArgumentBuilder {
             // dispatch: Pdf|Avif|Jpg|Png|Webp -> ConversionJob_ImageMagick).
             throw FFmpegArgumentBuilderError.unsupportedOutputType(preset.outputType)
         }
+    }
+
+    /// Second (silent) input for `addSilentAudioIfMissing`. Must come right
+    /// after the main `-i` so it becomes input #1.
+    private static func silentAudioInputArgs(_ video: VideoSettings) -> [String] {
+        guard video.enableAudio, video.addSilentAudioIfMissing == true else { return [] }
+        return ["-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=48000"]
+    }
+
+    /// Output-side options for the Spec Check fix fields: stream mapping
+    /// for the silent track, and the duration trim.
+    private static func specFixOutputArgs(_ video: VideoSettings) -> [String] {
+        var args: [String] = []
+        if video.enableAudio, video.addSilentAudioIfMissing == true {
+            args += ["-map", "0:v:0", "-map", "1:a:0", "-shortest"]
+        }
+        if let duration = video.maxDurationSeconds, duration > 0 {
+            args += ["-t", String(format: "%.3f", duration)]
+        }
+        return args
     }
 
     private static func channelArgs(_ channelCount: Int) -> [String] {

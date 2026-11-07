@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>File Converter</title>
+<meta name="description" content="Convert video, audio and images right in your browser — nothing is uploaded. Also as a browser extension and a right-click menu on Mac and Windows.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Cpath d='M9 12h11l-3-3M23 20H12l3 3' stroke='white' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<nav class="nav"><div class="wrap">
+  <a class="brand" href="#top"><span class="mark" aria-hidden="true">⇄</span><span>File Converter</span></a>
+  <div class="links">
+    <a href="#convert" data-i18n="navConvert"></a>
+    <a href="#everywhere" data-i18n="navEverywhere"></a>
+    <a href="#formats" data-i18n="navFormats"></a>
+  </div>
+  <span class="spacer"></span>
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" data-lang="vi">VI</button>
+    <button type="button" data-lang="ko">한국어</button>
+    <button type="button" data-lang="en">EN</button>
+  </div>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <h1 data-i18n="h1"></h1>
+  <p class="sub" data-i18n="sub"></p>
+  <div class="chips">
+    <span class="chip">🔒 <span data-i18n="chipPrivate"></span></span>
+    <span class="chip">⚡ <span data-i18n="chipFast"></span></span>
+    <span class="chip">🧩 <span data-i18n="chipEverywhere"></span></span>
+  </div>
+</div></header>
+
+<main class="wrap" id="convert">
+  <section class="converter" aria-labelledby="conv-title">
+    <h2 id="conv-title" class="sr-only" data-i18n="navConvert"></h2>
+    <label class="drop" id="drop">
+      <input type="file" id="file-input" multiple class="sr-only">
+      <span class="drop-icon" aria-hidden="true">⇪</span>
+      <span class="drop-title" data-i18n="dropTitle"></span>
+      <span class="drop-sub" data-i18n="dropSub"></span>
+      <span class="btn primary" data-i18n="choose"></span>
+    </label>
+
+    <div id="toolbar" class="toolbar" hidden>
+      <label class="all-to"><span data-i18n="allTo"></span>
+        <select id="all-target"></select>
+      </label>
+      <span class="spacer"></span>
+      <span class="engine" id="engine-status"></span>
+      <button type="button" class="btn" id="clear" data-i18n="clear"></button>
+      <button type="button" class="btn" id="download-all" data-i18n="downloadAll"></button>
+      <button type="button" class="btn primary" id="convert-all" data-i18n="convertAll"></button>
+    </div>
+
+    <ul class="files" id="files"></ul>
+    <p class="fine" data-i18n="fine"></p>
+  </section>
+
+  <section class="everywhere" id="everywhere">
+    <h2 data-i18n="evTitle"></h2>
+    <p class="lede" data-i18n="evLede"></p>
+    <div class="cards">
+      <article class="card">
+        <div class="card-head"><span class="ico" aria-hidden="true">🧩</span><h3 data-i18n="extTitle"></h3></div>
+        <p data-i18n="extBody"></p>
+        <ul class="ticks"><li data-i18n="ext1"></li><li data-i18n="ext2"></li><li data-i18n="ext3"></li></ul>
+        <a class="btn" href="FileConverter-extension.zip" download data-i18n="extDownload"></a>
+        <p class="note" data-i18n="extNote"></p>
+      </article>
+      <article class="card">
+        <div class="card-head"><span class="ico" aria-hidden="true">⌘</span><h3 data-i18n="macTitle"></h3></div>
+        <p data-i18n="macBody"></p>
+        <div class="cmd"><code id="mac-cmd">curl -fsSL https://raw.githubusercontent.com/thnhtng/FileConverter-mac/main/install.sh | bash</code><button type="button" class="copy" data-copy="mac-cmd" data-i18n="copy"></button></div>
+        <p class="note" data-i18n="macNote"></p>
+      </article>
+      <article class="card">
+        <div class="card-head"><span class="ico" aria-hidden="true">⊞</span><h3 data-i18n="winTitle"></h3></div>
+        <p data-i18n="winBody"></p>
+        <div class="cmd"><code id="win-cmd">irm https://raw.githubusercontent.com/thnhtng/FileConverter-mac/main/windows/install.ps1 | iex</code><button type="button" class="copy" data-copy="win-cmd" data-i18n="copy"></button></div>
+        <p class="note" data-i18n="winNote"></p>
+      </article>
+    </div>
+  </section>
+
+  <section id="formats">
+    <h2 data-i18n="fmtTitle"></h2>
+    <p class="lede" data-i18n="fmtLede"></p>
+    <div class="table-wrap"><table class="fmt-table" id="fmt-table"></table></div>
+  </section>
+</main>
+
+<footer><div class="wrap" data-i18n="footer"></div></footer>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

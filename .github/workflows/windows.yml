@@ -1,0 +1,49 @@
+# Runs the Windows right-click converter on a real Windows machine:
+# unit + conversion tests under Windows PowerShell 5.1 and PowerShell 7,
+# then installs the menu into HKCU, checks the registry, and uninstalls.
+name: Windows right-click menu
+
+on:
+  push:
+    paths: [windows/**, shared/formats.json, .github/workflows/windows.yml]
+  pull_request:
+    paths: [windows/**, shared/formats.json, .github/workflows/windows.yml]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg and ImageMagick
+        run: choco install ffmpeg imagemagick -y --no-progress
+      - name: Tests (Windows PowerShell 5.1)
+        shell: powershell
+        run: |
+          $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')
+          & .\windows\tests\run-tests.ps1
+      - name: Tests (PowerShell 7)
+        shell: pwsh
+        run: |
+          $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')
+          & ./windows/tests/run-tests.ps1
+      - name: Install, check registry, uninstall
+        shell: powershell
+        run: |
+          $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')
+          $env:FC_SKIP_TOOLS = '1'
+          & .\windows\install.ps1
+          $key = 'HKCU:\Software\Classes\SystemFileAssociations\.mp4\shell\FileConverter'
+          $v = Get-ItemProperty $key
+          if ($v.ExtendedSubCommandsKey -ne 'FileConverter.video') { throw "menu not registered: $($v | Out-String)" }
+          $cmd = (Get-Item 'HKCU:\Software\Classes\FileConverter.video\shell\01mp4\command').GetValue('')
+          Write-Host "command: $cmd"
+          if ($cmd -notmatch '-To mp4 "%1"') { throw "bad command: $cmd" }
+          # Run exactly what Explorer would run for a sample file.
+          $sample = Join-Path $env:RUNNER_TEMP 'sample clip.mov'
+          ffmpeg -v error -y -f lavfi -i testsrc=duration=1:size=160x120:rate=10 -c:v libx264 -preset ultrafast $sample
+          $line = $cmd.Replace('-WindowStyle Hidden', '').Replace('%1', $sample)
+          cmd /c "$line -Quiet"
+          if (-not (Test-Path (Join-Path $env:RUNNER_TEMP 'sample clip.mp4'))) { throw 'menu command did not produce sample clip.mp4' }
+          & "$env:LOCALAPPDATA\FileConverter\uninstall.ps1"
+          if (Test-Path $key) { throw 'uninstall left the menu behind' }

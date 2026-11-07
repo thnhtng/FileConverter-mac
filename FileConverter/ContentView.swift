@@ -8,13 +8,6 @@ import FileConverterKit
 /// (Application.xaml.cs `Initialize`/`RunConversions`).
 struct ContentView: View {
     @EnvironmentObject var appModel: AppModel
-    @State private var tab: Tab = .presets
-
-    private enum Tab: String, CaseIterable, Identifiable {
-        case presets = "Presets"
-        case settings = "Settings"
-        var id: String { rawValue }
-    }
 
     var body: some View {
         Group {
@@ -27,21 +20,22 @@ struct ContentView: View {
                 PresetPickerView(files: files)
             case .idle:
                 VStack(spacing: 0) {
-                    Picker("", selection: $tab) {
-                        ForEach(Tab.allCases) { Text($0.rawValue).tag($0) }
+                    Picker("", selection: $appModel.selectedTab) {
+                        ForEach(MainTab.allCases) { Text($0.rawValue).tag($0) }
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
                     .padding()
 
-                    switch tab {
+                    switch appModel.selectedTab {
+                    case .specCheck: SpecCheckView(model: appModel.specCheck)
                     case .presets: PresetListView()
                     case .settings: SettingsView()
                     }
                 }
             }
         }
-        .frame(minWidth: 560, minHeight: 420)
+        .frame(minWidth: 720, minHeight: 520)
         .alert("Error", isPresented: Binding(
             get: { appModel.loadError != nil },
             set: { if !$0 { appModel.loadError = nil } }

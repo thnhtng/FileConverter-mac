@@ -12,6 +12,19 @@ This is an internal/unofficial build, not affiliated with the upstream
 project. No notarized/Developer-ID release — see "Install" below for what
 that means in practice.
 
+## Use it everywhere
+
+One converter, four front ends, all driven by the same format table
+(`shared/formats.json`, kept in sync with the Swift engine by
+`SharedFormatsTests`):
+
+| Where | How | Code |
+|---|---|---|
+| **Web** | Drop files on a page, pick a format, download. Runs in the browser (canvas for images, ffmpeg.wasm for audio/video/GIF) — nothing is uploaded. | `web/`, `scripts/build-web.sh`, deployed by `.github/workflows/pages.yml` |
+| **Browser extension** | Right-click an image/video/audio on any page → *Download as MP4 / GIF / MP3 / JPG / PNG / WEBP…*; popup lists every media file on the page. Chrome/Edge/Brave/Arc/Opera; Safari via Xcode. Protected streams (YouTube etc.) are deliberately not supported. | `extension/` — see `extension/README.md` |
+| **macOS** | Right-click in Finder → Quick Actions → *Convert to MP4 / MP3 / JPG…* (one click), *Convert with File Converter* (preset picker), *Check with File Converter* (Spec Check). | this app + `install.sh` |
+| **Windows** | Right-click in Explorer → *Convert with File Converter* → format. `irm https://raw.githubusercontent.com/thnhtng/FileConverter-mac/main/windows/install.ps1 \| iex` | `windows/` — see `windows/README.md` |
+
 ## Install
 
 One command installs Homebrew (if needed), ffmpeg/ImageMagick/LibreOffice,
@@ -32,6 +45,43 @@ a file fetched via the install script above just runs. If you instead
 download the release zip by hand from a browser, macOS will quarantine it
 and refuse to open it until you right-click → Open once (or run
 `xattr -cr "/Applications/File Converter.app"`).
+
+## Spec Check (find what's wrong before you deliver)
+
+Before a video or image goes to an ad network, a store listing or a
+partner, someone usually opens it and checks size, aspect ratio,
+duration, frame rate, codec, audio and file size by hand — then guesses
+which conversion settings will fix whatever is off. Spec Check does that
+part:
+
+1. **Drop files** (or right-click in Finder → Quick Actions →
+   **"Check with File Converter"**).
+2. **Pick a delivery spec** — a few generic examples ship with the app
+   (vertical/landscape/square video ad, store screenshot, ≤ 25 MB
+   attachment); duplicate one and adjust it to your partner's real spec.
+3. **Read only the red rows.** Every rule shows *expected* vs *actual*
+   (e.g. `Dimensions — expected 1080 × 1920, has 1920 × 1080`). Values
+   that couldn't be read show as "to review", never as a silent pass.
+4. **Fix.** The app shows what the fix will do ("Resize to 1080 × 1920,
+   adding black bars", "Add a silent audio track", "Cap bitrate at
+   1672 kbps to fit 30 MB"…), converts a `_fixed` copy (the original is
+   never touched), and **re-checks the copy**. When a fix isn't possible
+   by conversion (clip too short, a format File Converter can't produce),
+   it says why instead of guessing.
+5. **Export a report** (HTML for Slack/email, CSV for spreadsheets).
+
+**AI spec import (optional).** In *Manage Specs… → + → Draft from Text with
+AI*, paste the requirements you were sent (email, help-center page, PDF
+excerpt). Claude (`claude-opus-5-5`, structured JSON output) drafts the
+spec; it opens flagged for review so a person confirms every field before
+it's used. Only the pasted text is sent — never your files. Needs a Claude
+API key (Settings → AI spec import, stored in the Keychain). Everything
+else in Spec Check runs fully offline.
+
+Code: `Packages/FileConverterKit/Sources/FileConverterKit/SpecCheck/`
+(`MediaProbe` → `SpecChecker` → `SpecFixPlanner`, plus
+`ClaudeSpecImporter` and `SpecCheckReport`); UI in
+`FileConverter/SpecCheckModel.swift` and `FileConverter/Views/Spec*.swift`.
 
 ## Project layout
 
@@ -151,6 +201,15 @@ io.file-converter.mac.QuickAction(0.1.0)  ...  File Converter.app/Contents/PlugI
   was narrowed from "any file" to the real supported categories
   (audio/video, image, PDF, common Office document UTIs). Verified
   end-to-end via the actual `fileconverter://convert?...` hand-off shape.
+- **Phase 5** (Spec Check): engine done and tested — 53 new package tests,
+  including real ffmpeg round trips (a 640×360 60 fps silent clip fails a
+  vertical-ad spec on 5 rules → planned fix → converted → re-check
+  passes; crop + size-cap variant too). The package builds and all 93
+  tests pass under Swift 6.0.3 on Linux with ffmpeg 6.1. The SwiftUI
+  screens (`SpecCheckView`, `SpecLibraryView`, `SpecImportView`) were
+  written without a Mac at hand and still need a first build + click-through
+  in Xcode. The AI importer's request/response handling is unit-tested
+  against recorded shapes, not yet against the live API.
 - **Phase 4** (packaging/distribution): done for the "internal use, shared
   with a handful of Macs" scope this repo targets — ad-hoc signed Release
   build + `install.sh` one-liner (Homebrew + backends + app, quarantine-safe

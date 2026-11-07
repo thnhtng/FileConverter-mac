@@ -24,10 +24,35 @@ public struct FFmpegTransform: Sendable {
     /// ComputeTransformArgs' special-casing of Mkv/Mp4 output.
     public var forceEvenDimensionsAndYUV420P: Bool
 
-    public init(scale: Double, rotationDegrees: Int, forceEvenDimensionsAndYUV420P: Bool = false) {
+    /// Spec Check fix: exact output frame size (pad/crop/stretch).
+    public var frameTarget: FrameTarget?
+    /// Spec Check fix: forced output frame rate.
+    public var framesPerSecond: Double?
+
+    public init(
+        scale: Double,
+        rotationDegrees: Int,
+        forceEvenDimensionsAndYUV420P: Bool = false,
+        frameTarget: FrameTarget? = nil,
+        framesPerSecond: Double? = nil
+    ) {
         self.scale = scale
         self.rotationDegrees = rotationDegrees
         self.forceEvenDimensionsAndYUV420P = forceEvenDimensionsAndYUV420P
+        self.frameTarget = frameTarget
+        self.framesPerSecond = framesPerSecond
+    }
+
+    /// Convenience for the video output types: pulls scale/rotation and the
+    /// Spec Check fix fields out of `VideoSettings`.
+    public init(video: VideoSettings, forceEvenDimensionsAndYUV420P: Bool = false) {
+        self.init(
+            scale: video.scale,
+            rotationDegrees: video.rotationDegrees,
+            forceEvenDimensionsAndYUV420P: forceEvenDimensionsAndYUV420P,
+            frameTarget: video.frameTarget,
+            framesPerSecond: video.framesPerSecond
+        )
     }
 
     /// Ported from ComputeTransformArgs (ConversionJob_FFMPEG.Converters.cs:40-118),
@@ -51,11 +76,39 @@ public struct FFmpegTransform: Sendable {
         default: break
         }
 
+        if let target = frameTarget, target.width > 0, target.height > 0 {
+            parts.append(Self.fitFilter(for: target, forceEven: forceEvenDimensionsAndYUV420P))
+        }
+
+        if let fps = framesPerSecond, fps > 0 {
+            parts.append("fps=\(formatted(fps))")
+        }
+
         if forceEvenDimensionsAndYUV420P {
             parts.append("format=yuv420p")
         }
 
         return parts.isEmpty ? nil : parts.joined(separator: ",")
+    }
+
+    /// Filter chain that lands the frame on exactly `target`'s size.
+    /// H.264 (`forceEven`) needs even dimensions throughout, so the target
+    /// is rounded down to even and the intermediate scale is forced
+    /// divisible by 2 (`force_divisible_by`, ffmpeg >= 4.4).
+    static func fitFilter(for target: FrameTarget, forceEven: Bool) -> String {
+        let width = forceEven ? max(2, target.width - target.width % 2) : target.width
+        let height = forceEven ? max(2, target.height - target.height % 2) : target.height
+        let divisible = forceEven ? ":force_divisible_by=2" : ""
+        switch target.fitMode {
+        case .pad:
+            return "scale=\(width):\(height):force_original_aspect_ratio=decrease\(divisible),"
+                + "pad=\(width):\(height):(ow-iw)/2:(oh-ih)/2:color=black,setsar=1"
+        case .crop:
+            return "scale=\(width):\(height):force_original_aspect_ratio=increase\(divisible),"
+                + "crop=\(width):\(height),setsar=1"
+        case .stretch:
+            return "scale=\(width):\(height),setsar=1"
+        }
     }
 
     private func formatted(_ value: Double) -> String {

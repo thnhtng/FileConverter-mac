@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spec Check — Giới thiệu</title>
+<style>
+:root {
+  --page: #ffffff; --soft: #f6f7f9; --card: #ffffff; --line: #e5e7eb;
+  --text: #0f172a; --muted: #5b6474; --faint: #94a3b8;
+  --accent: #2563eb; --accent-weak: #eaf1ff; --accent-text: #1d4ed8;
+  --ok: #16a34a; --ok-weak: #e8f7ee; --bad: #dc2626; --bad-weak: #fdecec; --warn: #d97706;
+  --ai: #7c3aed; --ai-weak: #f3edff;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 10px 30px rgba(15,23,42,.08);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0f1115; --soft: #161920; --card: #1a1d24; --line: #2a2e36;
+    --text: #f3f4f6; --muted: #a1a7b3; --faint: #6b7280;
+    --accent: #4f8cff; --accent-weak: #1b2a47; --accent-text: #8fb4ff;
+    --ok: #34c467; --ok-weak: #15291d; --bad: #f2645f; --bad-weak: #301819; --warn: #f0a432;
+    --ai: #a78bfa; --ai-weak: #251d3a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.4);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font: 16px/1.65 var(--font); color: var(--text); background: var(--page); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent-text); }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+
+/* nav */
+.nav { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--page) 88%, transparent); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--line); }
+.nav .wrap { display: flex; align-items: center; gap: 14px; height: 60px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+.mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff; display: grid; place-items: center; font-size: 15px; }
+.spacer { flex: 1; }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; }
+.lang button { border: 0; background: none; padding: 4px 12px; border-radius: 999px; font: inherit; font-size: 13px; color: var(--muted); cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--text); color: var(--page); }
+.nav-cta { font-size: 14px; font-weight: 600; text-decoration: none; background: var(--accent); color: #fff; padding: 7px 14px; border-radius: 999px; white-space: nowrap; }
+
+/* hero */
+.hero { padding: 72px 0 56px; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+.eyebrow { color: var(--accent-text); font-weight: 700; font-size: 14px; letter-spacing: .02em; }
+h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.15; margin: 10px 0 16px; letter-spacing: -.02em; }
+.hero p.sub { font-size: 18px; color: var(--muted); margin: 0 0 24px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+.chip { font-size: 13px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; color: var(--muted); background: var(--soft); }
+.ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-weight: 600; font-size: 15px; padding: 11px 20px; border-radius: 999px; border: 1px solid var(--line); color: var(--text); background: var(--card); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* hero visual: a finding card */
+.demo-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 18px; font-size: 13.5px; }
+.demo-card .head { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.dot { width: 20px; height: 20px; border-radius: 50%; color: #fff; display: inline-grid; place-items: center; font-size: 11px; font-weight: 800; flex: none; }
+.dot.fail { background: var(--bad); } .dot.ok { background: var(--ok); } .dot.sm { width: 15px; height: 15px; font-size: 9px; }
+.demo-card .name { font-weight: 700; }
+.demo-card .meta { color: var(--muted); font-size: 12px; }
+.rows { display: grid; grid-template-columns: 15px auto 1fr auto; gap: 5px 12px; align-items: center; margin: 4px 0 12px 30px; }
+.rows .r { font-weight: 600; } .rows .e { color: var(--muted); } .rows .a { color: var(--bad); font-weight: 600; text-align: right; }
+.fixline { margin-left: 30px; color: var(--muted); font-size: 12.5px; }
+.fixline ul { margin: 2px 0 10px; padding-left: 18px; }
+.fixed { margin-left: 30px; background: var(--ok-weak); border-radius: 10px; padding: 8px 10px; display: flex; gap: 8px; align-items: center; font-size: 12.5px; }
+
+/* sections */
+section { padding: 64px 0; }
+section.soft { background: var(--soft); }
+h2 { font-size: clamp(26px, 3.4vw, 34px); line-height: 1.2; margin: 6px 0 12px; letter-spacing: -.015em; }
+.lede { color: var(--muted); font-size: 17px; max-width: 720px; margin: 0 0 32px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+.card h3 { font-size: 17px; margin: 8px 0 6px; }
+.card p { margin: 0; color: var(--muted); font-size: 15px; }
+.ico { font-size: 22px; }
+
+.compare .card h3 { display: flex; align-items: center; gap: 8px; margin-top: 0; }
+.steps { list-style: none; margin: 10px 0 0; padding: 0; counter-reset: s; }
+.steps li { counter-increment: s; position: relative; padding: 9px 0 9px 38px; border-top: 1px solid var(--line); font-size: 15px; }
+.steps li:first-child { border-top: 0; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: 9px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; background: var(--soft); color: var(--muted); }
+.before li::before { background: var(--bad-weak); color: var(--bad); }
+.after li::before { background: var(--accent-weak); color: var(--accent-text); }
+.time { display: inline-block; margin-top: 12px; font-weight: 700; font-size: 14px; padding: 3px 10px; border-radius: 999px; }
+.before .time { background: var(--bad-weak); color: var(--bad); } .after .time { background: var(--ok-weak); color: var(--ok); }
+
+.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.flow .card { padding: 16px; }
+.flow .n { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-weak); color: var(--accent-text); font-weight: 800; display: grid; place-items: center; font-size: 14px; }
+.flow h3 { font-size: 15.5px; }
+.flow p { font-size: 14px; }
+
+.theme { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.theme .card.main { border: 2px solid var(--accent); }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; color: var(--accent-text); background: var(--accent-weak); padding: 2px 10px; border-radius: 999px; }
+.tag.ai { color: var(--ai); background: var(--ai-weak); }
+.checklist { list-style: none; padding: 0; margin: 10px 0 0; }
+.checklist li { padding: 4px 0 4px 26px; position: relative; color: var(--muted); font-size: 15px; }
+.checklist li::before { content: "✓"; position: absolute; left: 2px; color: var(--ok); font-weight: 800; }
+
+.rules { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.rules span { font-size: 13.5px; background: var(--soft); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; }
+
+/* calculator */
+.calc { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
+.calc .inputs { display: grid; gap: 16px; }
+.calc label { display: grid; gap: 6px; font-size: 14px; font-weight: 600; }
+.calc label span.val { font-weight: 700; color: var(--accent-text); }
+.calc input[type=range] { width: 100%; accent-color: var(--accent); }
+.result { display: grid; gap: 10px; align-content: center; text-align: center; background: var(--accent-weak); border-radius: 16px; padding: 24px; }
+.big { font-size: 44px; font-weight: 800; line-height: 1.1; color: var(--accent-text); letter-spacing: -.02em; }
+.result small { color: var(--muted); font-size: 13px; }
+.assume { font-size: 13px; color: var(--faint); margin-top: 14px; }
+
+.limits li { margin: 6px 0; color: var(--muted); }
+.limits b { color: var(--text); }
+
+.code { font-family: var(--mono); font-size: 13.5px; background: #0f172a; color: #e2e8f0; border-radius: 12px; padding: 14px 16px; overflow-x: auto; white-space: pre; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.stat b { display: block; font-size: 24px; letter-spacing: -.01em; }
+.stat span { color: var(--muted); font-size: 13px; }
+
+footer { padding: 32px 0 48px; color: var(--faint); font-size: 13px; border-top: 1px solid var(--line); }
+
+@media (max-width: 880px) {
+  .hero .wrap, .theme, .calc, .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); }
+  .flow, .stats, .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero { padding: 40px 0 32px; }
+  section { padding: 44px 0; }
+}
+@media (max-width: 520px) {
+  .wrap { padding: 0 16px; }
+  .flow, .grid4 { grid-template-columns: minmax(0, 1fr); }
+  .nav-cta { display: none; }
+  .rows { grid-template-columns: 15px 1fr auto; margin-left: 0; }
+  .rows .e { display: none; }
+  .fixline, .fixed { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="wrap">
+  <div class="brand"><span class="mark" aria-hidden="true">✓</span><span>Spec Check</span></div>
+  <span class="spacer"></span>
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" data-lang="vi">VI</button>
+    <button type="button" data-lang="ko">한국어</button>
+    <button type="button" data-lang="en">EN</button>
+  </div>
+  <a class="nav-cta" href="mockup.html" data-i18n="ctaTry"></a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div>
+    <div class="eyebrow" data-i18n="eyebrow"></div>
+    <h1 data-i18n="h1"></h1>
+    <p class="sub" data-i18n="sub"></p>
+    <div class="chips"><span class="chip" data-i18n="chip1"></span><span class="chip" data-i18n="chip2"></span><span class="chip" data-i18n="chip3"></span><span class="chip" data-i18n="chip4"></span></div>
+    <div class="ctas"><a class="btn primary" href="mockup.html" data-i18n="ctaTry"></a><a class="btn" href="#how" data-i18n="ctaHow"></a></div>
+  </div>
+  <div class="demo-card" aria-hidden="true">
+    <div class="head"><span class="dot fail">✕</span><div><div class="name">launch_trailer_16x9.mp4</div><div class="meta" data-i18n="demoMeta"></div></div></div>
+    <div class="rows">
+      <span class="dot fail sm">✕</span><span class="r" data-i18n="rSize"></span><span class="e">≤ 30 MB</span><span class="a">42.6 MB</span>
+      <span class="dot fail sm">✕</span><span class="r" data-i18n="rDim"></span><span class="e">1080 × 1920</span><span class="a">1920 × 1080</span>
+      <span class="dot fail sm">✕</span><span class="r" data-i18n="rRatio"></span><span class="e">9:16</span><span class="a">16:9</span>
+    </div>
+    <div class="fixline"><b data-i18n="fixWill"></b><ul><li data-i18n="fix1"></li><li data-i18n="fix2"></li></ul></div>
+    <div class="fixed"><span class="dot ok sm">✓</span><span data-i18n="fixedOk"></span></div>
+  </div>
+</div></header>
+
+<section class="soft" id="problem"><div class="wrap">
+  <div class="tag" data-i18n="pTag"></div>
+  <h2 data-i18n="pTitle"></h2>
+  <p class="lede" data-i18n="pLede"></p>
+  <div class="grid3">
+    <div class="card"><div class="ico">🔍</div><h3 data-i18n="p1t"></h3><p data-i18n="p1"></p></div>
+    <div class="card"><div class="ico">🎛️</div><h3 data-i18n="p2t"></h3><p data-i18n="p2"></p></div>
+    <div class="card"><div class="ico">🔁</div><h3 data-i18n="p3t"></h3><p data-i18n="p3"></p></div>
+  </div>
+</div></section>
+
+<section id="compare"><div class="wrap">
+  <div class="tag" data-i18n="cTag"></div>
+  <h2 data-i18n="cTitle"></h2>
+  <p class="lede" data-i18n="cLede"></p>
+  <div class="grid2 compare">
+    <div class="card before"><h3>✕ <span data-i18n="beforeT"></span></h3><ol class="steps"><li data-i18n="b1"></li><li data-i18n="b2"></li><li data-i18n="b3"></li><li data-i18n="b4"></li><li data-i18n="b5"></li></ol><span class="time" data-i18n="bTime"></span></div>
+    <div class="card after"><h3>✓ <span data-i18n="afterT"></span></h3><ol class="steps"><li data-i18n="a1"></li><li data-i18n="a2"></li><li data-i18n="a3"></li><li data-i18n="a4"></li></ol><span class="time" data-i18n="aTime"></span></div>
+  </div>
+</div></section>
+
+<section class="soft" id="how"><div class="wrap">
+  <div class="tag" data-i18n="hTag"></div>
+  <h2 data-i18n="hTitle"></h2>
+  <p class="lede" data-i18n="hLede"></p>
+  <div class="flow">
+    <div class="card"><div class="n">1</div><h3 data-i18n="s1t"></h3><p data-i18n="s1"></p></div>
+    <div class="card"><div class="n">2</div><h3 data-i18n="s2t"></h3><p data-i18n="s2"></p></div>
+    <div class="card"><div class="n">3</div><h3 data-i18n="s3t"></h3><p data-i18n="s3"></p></div>
+    <div class="card"><div class="n">4</div><h3 data-i18n="s4t"></h3><p data-i18n="s4"></p></div>
+    <div class="card"><div class="n">5</div><h3 data-i18n="s5t"></h3><p data-i18n="s5"></p></div>
+  </div>
+  <p class="assume" data-i18n="rulesTitle" style="margin-top:28px;font-weight:600;color:var(--muted)"></p>
+  <div class="rules" id="rules"></div>
+</div></section>
+
+<section id="everywhere"><div class="wrap">
+  <div class="tag" data-i18n="eTag"></div>
+  <h2 data-i18n="eTitle"></h2>
+  <p class="lede" data-i18n="eLede"></p>
+  <div class="grid4">
+    <div class="card"><div class="ico">🌐</div><h3 data-i18n="e1t"></h3><p data-i18n="e1"></p></div>
+    <div class="card"><div class="ico">🧩</div><h3 data-i18n="e2t"></h3><p data-i18n="e2"></p></div>
+    <div class="card"><div class="ico">⌘</div><h3 data-i18n="e3t"></h3><p data-i18n="e3"></p></div>
+    <div class="card"><div class="ico">⊞</div><h3 data-i18n="e4t"></h3><p data-i18n="e4"></p></div>
+  </div>
+  <p class="assume" data-i18n="eNote"></p>
+</div></section>
+
+<section id="theme"><div class="wrap">
+  <div class="tag" data-i18n="tTag"></div>
+  <h2 data-i18n="tTitle"></h2>
+  <p class="lede" data-i18n="tLede"></p>
+  <div class="theme">
+    <div class="card main"><span class="tag" data-i18n="t1tag"></span><h3 data-i18n="t1t"></h3><p data-i18n="t1"></p><ul class="checklist"><li data-i18n="t1a"></li><li data-i18n="t1b"></li><li data-i18n="t1c"></li></ul></div>
+    <div class="card"><span class="tag ai" data-i18n="t2tag"></span><h3 data-i18n="t2t"></h3><p data-i18n="t2"></p><ul class="checklist"><li data-i18n="t2a"></li><li data-i18n="t2b"></li><li data-i18n="t2c"></li></ul></div>
+  </div>
+</div></section>
+
+<section class="soft" id="impact"><div class="wrap">
+  <div class="tag" data-i18n="iTag"></div>
+  <h2 data-i18n="iTitle"></h2>
+  <p class="lede" data-i18n="iLede"></p>
+  <div class="calc card">
+    <div class="inputs">
+      <label><span><span data-i18n="in1"></span>: <span class="val" id="v-files"></span></span><input type="range" id="files" min="5" max="300" step="5" value="40"></label>
+      <label><span><span data-i18n="in2"></span>: <span class="val" id="v-manual"></span></span><input type="range" id="manual" min="1" max="15" step="1" value="4"></label>
+      <label><span><span data-i18n="in3"></span>: <span class="val" id="v-reject"></span></span><input type="range" id="reject" min="0" max="50" step="5" value="15"></label>
+    </div>
+    <div class="result"><small data-i18n="outLabel"></small><div class="big" id="hours"></div><small id="out-detail"></small></div>
+  </div>
+  <p class="assume" data-i18n="assume"></p>
+</div></section>
+
+<section id="limits"><div class="wrap">
+  <div class="grid2" style="gap:48px">
+    <div>
+      <div class="tag" data-i18n="lTag"></div>
+      <h2 data-i18n="lTitle"></h2>
+      <ul class="limits"><li data-i18n-html="l1"></li><li data-i18n-html="l2"></li><li data-i18n-html="l3"></li><li data-i18n-html="l4"></li></ul>
+    </div>
+    <div>
+      <div class="tag" data-i18n="bTag"></div>
+      <h2 data-i18n="bTitle"></h2>
+      <p style="color:var(--muted);margin-top:0" data-i18n="bLede"></p>
+      <div class="code">curl -fsSL https://raw.githubusercontent.com/thnhtng/FileConverter-mac/main/install.sh | bash</div>
+      <div class="stats">
+        <div class="stat"><b>93</b><span data-i18n="st1"></span></div>
+        <div class="stat"><b>10</b><span data-i18n="st2"></span></div>
+        <div class="stat"><b>5</b><span data-i18n="st3"></span></div>
+        <div class="stat"><b>0</b><span data-i18n="st4"></span></div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap" data-i18n="footer"></div></footer>
+
+<script>
+"use strict";
+const STR = {
+  vi: {
+    ctaTry: "Dùng thử mockup →", ctaHow: "Cách hoạt động",
+    eyebrow: "AX Hero · File Converter cho macOS",
+    h1: "Biết ngay file nào sai spec — và sửa chỉ với một cú bấm",
+    sub: "Spec Check đối chiếu video, ảnh trước khi gửi đi với tiêu chuẩn của nơi nhận, chỉ ra đúng chỗ khác biệt kèm giá trị cần/thực tế, rồi tự tạo bản sửa đạt chuẩn. Con người chỉ cần nhìn những dòng màu đỏ.",
+    chip1: "macOS · chuột phải trong Finder", chip2: "Chạy offline trên máy", chip3: "AI soạn spec, người duyệt", chip4: "Không bao giờ sửa file gốc",
+    demoMeta: "3 lỗi · 1920×1080 · 30 s · 42.6 MB", rSize: "Dung lượng", rDim: "Kích thước", rRatio: "Tỉ lệ",
+    fixWill: "Bản sửa sẽ:", fix1: "Đổi cỡ 1080 × 1920, thêm viền (không mất nội dung)", fix2: "Giới hạn bitrate để vừa 30 MB", fixedOk: "launch_trailer_16x9_fixed.mp4 — đạt spec",
+    pTag: "Vấn đề", pTitle: "Kiểm tra file trước khi gửi vẫn đang làm bằng mắt",
+    pLede: "Mỗi nơi nhận — mạng quảng cáo, store, đối tác, hệ thống nội bộ — có spec riêng về kích thước, tỉ lệ, thời lượng, dung lượng, codec, âm thanh. Hiện tại người làm phải tự mở từng file để so.",
+    p1t: "So từng thông số bằng tay", p1: "Mở file, xem thông tin, mở PDF spec, so 8–10 thông số. Dễ bỏ sót, nhất là khi kiểm cả loạt file.",
+    p2t: "Đoán cách chuyển đổi", p2: "Biết là sai nhưng chỉnh thế nào cho đúng? Thử thông số encode, xuất lại, kiểm lại — mất thời gian và cần kinh nghiệm.",
+    p3t: "Bị từ chối sau khi upload", p3: "Lỗi chỉ lộ ra khi nền tảng từ chối file. Thêm một vòng sửa — gửi — chờ, làm chậm cả kế hoạch ra mắt.",
+    cTag: "Thiết kế lại quy trình", cTitle: "Không thay một bước bằng AI — mà bỏ cả vòng lặp thủ công",
+    cLede: "Quy trình mới đi từ đầu vào (file + spec) đến kết quả (file đạt chuẩn + báo cáo) trong một chỗ.",
+    beforeT: "Trước đây", b1: "Mở từng file, xem thông tin", b2: "Tìm và đọc tài liệu spec của nơi nhận", b3: "So từng thông số, ghi chú chỗ sai", b4: "Đoán thông số rồi xuất lại bằng phần mềm dựng", b5: "Upload — nếu bị từ chối thì làm lại từ bước 1", bTime: "Ước tính 3–5 phút / file, chưa tính lần bị từ chối",
+    afterT: "Với Spec Check", a1: "Kéo thả cả loạt file, chọn spec", a2: "Xem ngay các dòng đỏ: cần gì, file đang có gì", a3: "Bấm \"Sửa tất cả\" — app tạo bản _fixed và kiểm tra lại", a4: "Xuất báo cáo gửi team qua Slack/email", aTime: "Ước tính ~10 giây / file để xem kết quả",
+    hTag: "Cách hoạt động", hTitle: "Năm bước, không cần biết kỹ thuật encode", hLede: "Toàn bộ chạy trên máy Mac bằng ffmpeg/ImageMagick — file không rời khỏi máy.",
+    s1t: "Thả file", s1: "Kéo vào cửa sổ, hoặc chuột phải trong Finder → \"Check with File Converter\".",
+    s2t: "Chọn spec", s2: "Dùng spec mẫu hoặc tạo spec theo đối tác. Ô trống = không kiểm tra.",
+    s3t: "Đọc dòng đỏ", s3: "Mỗi quy tắc hiện \"cần\" và \"thực tế\". Không đọc được thì báo \"cần xem\", không tự cho qua.",
+    s4t: "Sửa & kiểm lại", s4: "Xem trước bản sửa sẽ làm gì, rồi tạo bản sao đạt chuẩn và kiểm tra lại chính bản đó.",
+    s5t: "Báo cáo", s5: "Xuất HTML (Slack/email) hoặc CSV (bảng tính) cho người làm file.",
+    rulesTitle: "10 quy tắc được kiểm tra:",
+    rules: ["Loại file", "Định dạng", "Dung lượng", "Kích thước", "Tỉ lệ khung", "Thời lượng", "Tốc độ khung hình", "Codec video", "Codec âm thanh", "Track âm thanh"],
+    eTag: "Dùng ở mọi nơi", eTitle: "Một bộ chuyển đổi — bốn cách dùng",
+    eLede: "Cùng một bảng định dạng và chất lượng mặc định (shared/formats.json, có test tự động giữ đồng bộ), nên file chuyển ở đâu cũng ra giống nhau.",
+    e1t: "Trang web", e1: "Thả file vào trang, chọn đuôi, tải về. Chạy ngay trong trình duyệt (ffmpeg.wasm + canvas), không tải file lên server.",
+    e2t: "Extension trình duyệt", e2: "Chuột phải vào ảnh/video trên bất kỳ trang nào → tải và chuyển đuôi luôn. Popup liệt kê mọi media của trang. Chrome, Edge, Brave; Safari qua Xcode.",
+    e3t: "Mac — Quick Action", e3: "Chuột phải trong Finder → \"Convert to MP4 / MP3 / JPG…\" chuyển ngay; chỉ hiện đuôi hợp với file. Kèm app và Spec Check.",
+    e4t: "Windows — menu chuột phải", e4: "Chuột phải trong Explorer → \"Convert with File Converter\" → chọn đuôi. Một lệnh PowerShell để cài, không cần quyền admin.",
+    eNote: "Extension chỉ tải media có file thật trên trang; không hỗ trợ YouTube và các trang stream có bảo vệ (theo điều khoản của họ và chính sách Chrome Web Store).",
+    tTag: "Chủ đề", tTitle: "Gắn với chủ đề chung của AX Hero",
+    tLede: "Trọng tâm là chủ đề #2, với AI hỗ trợ đúng chỗ con người tốn công nhất: đọc spec dài dòng.",
+    t1tag: "Chủ đề #2", t1t: "Tìm lỗi trong sản phẩm công việc", t1: "Đối chiếu sản phẩm (file media) với tiêu chuẩn (spec), đánh dấu điểm khác biệt để con người chỉ kiểm tra những chỗ đó.",
+    t1a: "So sánh tự động, có giá trị cần/thực tế", t1b: "Chỉ hiện dòng sai; dòng đạt được ẩn", t1c: "Sửa tự động + kiểm tra lại bằng chính bộ quy tắc",
+    t2tag: "AI + con người", t2t: "AI soạn spec, con người quyết định", t2: "Dán email/trang hướng dẫn của đối tác, Claude chuyển thành spec có cấu trúc. Bản nháp luôn được đánh dấu để người duyệt từng ô trước khi dùng.",
+    t2a: "Chỉ gửi đoạn văn bản, không gửi file", t2b: "AI không tự bịa giá trị: không nêu = để trống", t2c: "Không có API key vẫn dùng được toàn bộ phần còn lại",
+    iTag: "Hiệu quả kỳ vọng", iTitle: "Tiết kiệm bao nhiêu thời gian cho team bạn?", iLede: "Kéo thanh trượt theo khối lượng thực tế. Đây là ước tính để thảo luận, sẽ đo lại khi chạy thử.",
+    in1: "Số file kiểm mỗi tuần", in2: "Phút kiểm thủ công / file", in3: "Tỉ lệ file bị từ chối (%)",
+    outLabel: "Thời gian tiết kiệm mỗi tháng (ước tính)", outDetail: "≈ {d} ngày làm việc · {r} lần sửa-gửi lại được tránh",
+    assume: "Giả định: Spec Check cần ~10 giây/file để xem kết quả; mỗi lần bị từ chối tốn thêm ~15 phút sửa-gửi lại; 4,3 tuần/tháng; 8 giờ/ngày. Đây là con số minh họa, chưa phải số đo thực tế.",
+    lTag: "Giới hạn", lTitle: "Nói rõ những gì chưa làm được",
+    l1: "<b>Video quá ngắn</b> hoặc cần dựng lại: app không \"chế\" thêm nội dung, chỉ báo lý do.",
+    l2: "<b>Spec do AI soạn</b> luôn cần người duyệt — app đánh dấu bản nháp cho tới khi bạn xác nhận.",
+    l3: "<b>Không xuất được .mov</b>; spec chỉ chấp nhận .mov sẽ được báo là cần xuất từ phần mềm dựng.",
+    l4: "<b>Trạng thái:</b> engine kiểm tra/sửa đã có 93 bài test tự động (gồm chuyển đổi ffmpeg thật); giao diện macOS đang hoàn thiện và cần chạy thử trên Mac.",
+    bTag: "Cài đặt & công nghệ", bTitle: "Một lệnh để cài", bLede: "Cài Homebrew (nếu chưa có), ffmpeg, ImageMagick và app. Sau đó chuột phải vào file trong Finder → Quick Actions.",
+    st1: "bài test tự động", st2: "quy tắc kiểm tra", st3: "spec mẫu có sẵn", st4: "file bị tải lên mạng",
+    footer: "Spec Check — tính năng mới của File Converter cho macOS (mã nguồn GPL-3.0). Xây dựng cùng Claude Code cho chương trình AX Hero.",
+  },
+  ko: {
+    ctaTry: "목업 체험하기 →", ctaHow: "작동 방식",
+    eyebrow: "AX Hero · macOS용 File Converter",
+    h1: "스펙에 안 맞는 파일을 바로 찾고, 클릭 한 번으로 수정",
+    sub: "Spec Check는 영상·이미지를 보내기 전에 받는 곳의 기준과 비교해 다른 부분만 기준값/실제값과 함께 짚어 주고, 기준에 맞는 수정본을 자동으로 만듭니다. 사람은 빨간 줄만 확인하면 됩니다.",
+    chip1: "macOS · Finder 우클릭", chip2: "내 Mac에서 오프라인 실행", chip3: "AI는 초안, 결정은 사람", chip4: "원본 파일은 절대 수정 안 함",
+    demoMeta: "문제 3건 · 1920×1080 · 30 s · 42.6 MB", rSize: "용량", rDim: "해상도", rRatio: "비율",
+    fixWill: "수정 내용:", fix1: "1080 × 1920로 변환, 여백 추가 (잘림 없음)", fix2: "30 MB 이하가 되도록 비트레이트 제한", fixedOk: "launch_trailer_16x9_fixed.mp4 — 스펙 충족",
+    pTag: "문제", pTitle: "보내기 전 파일 검수는 아직도 눈으로 합니다",
+    pLede: "광고 네트워크, 스토어, 파트너, 사내 시스템마다 해상도·비율·길이·용량·코덱·오디오 기준이 다릅니다. 지금은 담당자가 파일을 하나씩 열어 비교합니다.",
+    p1t: "항목별 수작업 비교", p1: "파일 정보 확인, 스펙 PDF 열기, 8~10개 항목 대조. 여러 파일을 한꺼번에 볼 때 놓치기 쉽습니다.",
+    p2t: "변환 설정은 감으로", p2: "틀린 건 알아도 어떻게 고쳐야 할지가 문제입니다. 인코딩 설정을 바꿔 다시 내보내고 다시 확인 — 시간과 경험이 필요합니다.",
+    p3t: "업로드 후에야 반려", p3: "문제는 플랫폼이 파일을 반려할 때 드러납니다. 수정 — 재전송 — 대기가 한 번 더 생겨 일정이 밀립니다.",
+    cTag: "업무 흐름 재설계", cTitle: "한 단계를 AI로 바꾸는 게 아니라, 수작업 루프 자체를 없앱니다",
+    cLede: "입력(파일 + 스펙)부터 결과(기준을 충족한 파일 + 리포트)까지 한 곳에서 끝납니다.",
+    beforeT: "기존 방식", b1: "파일을 하나씩 열어 정보 확인", b2: "받는 곳의 스펙 문서를 찾아 읽기", b3: "항목별로 비교하고 틀린 곳 메모", b4: "설정을 추측해 편집 툴에서 다시 내보내기", b5: "업로드 — 반려되면 1단계부터 다시", bTime: "파일당 약 3~5분 (반려 시간 제외, 추정)",
+    afterT: "Spec Check 사용", a1: "여러 파일을 끌어다 놓고 스펙 선택", a2: "빨간 줄 확인: 기준값과 실제값", a3: "\"모두 수정\" — _fixed 사본 생성 후 재검사", a4: "리포트를 슬랙/메일로 공유", aTime: "결과 확인까지 파일당 약 10초 (추정)",
+    hTag: "작동 방식", hTitle: "인코딩 지식 없이 다섯 단계", hLede: "모든 처리는 Mac에서 ffmpeg/ImageMagick으로 실행되며 파일은 밖으로 나가지 않습니다.",
+    s1t: "파일 놓기", s1: "창에 끌어다 놓거나 Finder 우클릭 → \"Check with File Converter\".",
+    s2t: "스펙 선택", s2: "예시 스펙을 쓰거나 파트너 기준으로 만듭니다. 빈 칸 = 검사 안 함.",
+    s3t: "빨간 줄 확인", s3: "규칙마다 \"기준\"과 \"실제\"를 보여 줍니다. 읽을 수 없으면 통과가 아니라 \"확인 필요\"로 표시합니다.",
+    s4t: "수정 · 재검사", s4: "수정 내용을 미리 보고, 기준을 충족한 사본을 만든 뒤 그 사본을 다시 검사합니다.",
+    s5t: "리포트", s5: "HTML(슬랙/메일) 또는 CSV(스프레드시트)로 파일 제작자에게 전달합니다.",
+    rulesTitle: "검사하는 10가지 규칙:",
+    rules: ["미디어 유형", "파일 형식", "파일 용량", "해상도", "화면 비율", "길이", "프레임 레이트", "비디오 코덱", "오디오 코덱", "오디오 트랙"],
+    eTag: "어디서나 사용", eTitle: "하나의 변환기, 네 가지 사용법",
+    eLede: "같은 형식표와 기본 품질(shared/formats.json, 자동 테스트로 동기화)을 쓰기 때문에 어디서 변환해도 결과가 같습니다.",
+    e1t: "웹 페이지", e1: "파일을 놓고 형식을 고른 뒤 다운로드. 브라우저 안에서(ffmpeg.wasm + canvas) 처리하며 서버로 업로드하지 않습니다.",
+    e2t: "브라우저 확장 프로그램", e2: "어느 페이지에서든 이미지/영상 우클릭 → 다운로드하면서 바로 변환. 팝업에서 페이지의 모든 미디어 확인. Chrome, Edge, Brave · Safari는 Xcode로.",
+    e3t: "Mac — 빠른 동작", e3: "Finder 우클릭 → \"Convert to MP4 / MP3 / JPG…\"로 즉시 변환, 파일에 맞는 형식만 표시. 앱과 Spec Check 포함.",
+    e4t: "Windows — 우클릭 메뉴", e4: "탐색기 우클릭 → \"Convert with File Converter\" → 형식 선택. PowerShell 명령 한 줄로 설치, 관리자 권한 불필요.",
+    eNote: "확장 프로그램은 페이지에 실제 파일로 있는 미디어만 다운로드합니다. YouTube 등 보호된 스트리밍 사이트는 약관과 Chrome 웹 스토어 정책에 따라 지원하지 않습니다.",
+    tTag: "주제", tTitle: "AX Hero 공통 주제와의 연결",
+    tLede: "핵심은 2번 주제이며, 사람이 가장 수고스러운 부분인 긴 스펙 문서 읽기를 AI가 돕습니다.",
+    t1tag: "주제 #2", t1t: "업무 산출물에서 오류 찾기", t1: "산출물(미디어 파일)을 기준(스펙)과 대조해 차이를 표시하고, 사람은 그 부분만 확인합니다.",
+    t1a: "기준값/실제값과 함께 자동 비교", t1b: "틀린 줄만 표시, 통과 항목은 숨김", t1c: "자동 수정 후 같은 규칙으로 재검사",
+    t2tag: "AI + 사람", t2t: "AI가 스펙 초안, 사람이 결정", t2: "파트너의 메일이나 가이드 페이지를 붙여 넣으면 Claude가 구조화된 스펙으로 바꿉니다. 초안은 사람이 항목별로 검토할 때까지 표시됩니다.",
+    t2a: "텍스트만 전송, 파일은 전송 안 함", t2b: "AI가 값을 지어내지 않음: 언급 없으면 빈 칸", t2c: "API 키가 없어도 나머지 기능은 모두 사용 가능",
+    iTag: "기대 효과", iTitle: "우리 팀은 얼마나 시간을 아낄 수 있을까?", iLede: "실제 업무량에 맞게 슬라이더를 움직여 보세요. 논의용 추정치이며 시범 운영에서 다시 측정합니다.",
+    in1: "주간 검수 파일 수", in2: "파일당 수작업 검수 시간(분)", in3: "반려되는 파일 비율(%)",
+    outLabel: "월간 절약 시간 (추정)", outDetail: "≈ 근무일 {d}일 · 수정·재전송 {r}회 감소",
+    assume: "가정: Spec Check 결과 확인 파일당 약 10초, 반려 1회당 수정·재전송 약 15분 추가, 월 4.3주, 하루 8시간. 실제 측정값이 아닌 예시 수치입니다.",
+    lTag: "한계", lTitle: "아직 안 되는 것도 분명히",
+    l1: "<b>너무 짧은 영상</b>이나 재편집이 필요한 경우: 내용을 만들어 내지 않고 이유만 알려 줍니다.",
+    l2: "<b>AI가 작성한 스펙</b>은 반드시 사람이 검토합니다. 확인 전까지 초안으로 표시됩니다.",
+    l3: "<b>.mov로는 내보낼 수 없습니다</b>. .mov만 허용하는 스펙은 편집 툴에서 내보내도록 안내합니다.",
+    l4: "<b>현재 상태:</b> 검사·수정 엔진은 실제 ffmpeg 변환을 포함한 자동 테스트 93개를 통과했으며, macOS 화면은 마무리 중으로 Mac에서 실행 확인이 필요합니다.",
+    bTag: "설치 · 기술", bTitle: "명령어 한 줄로 설치", bLede: "Homebrew(없으면), ffmpeg, ImageMagick과 앱을 설치합니다. 이후 Finder에서 파일 우클릭 → 빠른 동작.",
+    st1: "자동 테스트", st2: "검사 규칙", st3: "기본 예시 스펙", st4: "외부로 업로드되는 파일",
+    footer: "Spec Check — macOS용 File Converter의 신규 기능 (GPL-3.0 오픈소스). AX Hero 프로그램을 위해 Claude Code와 함께 만들었습니다.",
+  },
+  en: {
+    ctaTry: "Try the mockup →", ctaHow: "How it works",
+    eyebrow: "AX Hero · File Converter for macOS",
+    h1: "See which files break the spec — and fix them in one click",
+    sub: "Spec Check compares videos and images against the receiving side's requirements before you send them, flags exactly what differs (expected vs actual), and creates a compliant copy automatically. People only look at the red rows.",
+    chip1: "macOS · right-click in Finder", chip2: "Runs offline on your Mac", chip3: "AI drafts, people decide", chip4: "Never modifies the original",
+    demoMeta: "3 problems · 1920×1080 · 30 s · 42.6 MB", rSize: "File size", rDim: "Dimensions", rRatio: "Aspect ratio",
+    fixWill: "Fix will:", fix1: "Resize to 1080 × 1920 with bars (nothing cut off)", fix2: "Cap bitrate to fit 30 MB", fixedOk: "launch_trailer_16x9_fixed.mp4 — meets the spec",
+    pTag: "Problem", pTitle: "Checking files before delivery is still done by eye",
+    pLede: "Every destination — ad networks, app stores, partners, internal systems — has its own rules for size, ratio, length, file size, codec and audio. Today someone opens each file and compares by hand.",
+    p1t: "Manual, rule by rule", p1: "Open the file, read its info, open the spec PDF, compare 8–10 values. Easy to miss one, especially across a batch.",
+    p2t: "Guessing the conversion", p2: "You know it's wrong — but which settings fix it? Tweak encoder settings, re-export, re-check. Slow, and it takes experience.",
+    p3t: "Rejected after upload", p3: "Problems surface when the platform rejects the file. One more fix–resend–wait loop that delays the launch.",
+    cTag: "Redesigned workflow", cTitle: "Not one step swapped for AI — the whole manual loop removed",
+    cLede: "The new flow goes from input (files + spec) to outcome (compliant files + report) in one place.",
+    beforeT: "Before", b1: "Open each file and read its info", b2: "Find and read the destination's spec document", b3: "Compare every value, note what's off", b4: "Guess settings and re-export from the editor", b5: "Upload — if rejected, start over at step 1", bTime: "Est. 3–5 min per file, not counting rejections",
+    afterT: "With Spec Check", a1: "Drop a batch of files, pick a spec", a2: "Read the red rows: what's expected, what the file has", a3: "Click \"Fix all\" — the app creates _fixed copies and re-checks them", a4: "Export a report to Slack or email", aTime: "Est. ~10 s per file to review results",
+    hTag: "How it works", hTitle: "Five steps, no encoding know-how needed", hLede: "Everything runs on your Mac with ffmpeg/ImageMagick — files never leave the machine.",
+    s1t: "Drop files", s1: "Drag into the window, or right-click in Finder → \"Check with File Converter\".",
+    s2t: "Pick a spec", s2: "Use an example spec or build one for your partner. Empty field = not checked.",
+    s3t: "Read the red rows", s3: "Each rule shows \"expected\" and \"has\". Anything unreadable is flagged \"to review\", never silently passed.",
+    s4t: "Fix & re-check", s4: "Preview what the fix will do, create a compliant copy, then re-check that copy.",
+    s5t: "Report", s5: "Export HTML (Slack/email) or CSV (spreadsheets) for whoever made the files.",
+    rulesTitle: "The 10 rules it checks:",
+    rules: ["Media type", "File format", "File size", "Dimensions", "Aspect ratio", "Duration", "Frame rate", "Video codec", "Audio codec", "Audio track"],
+    eTag: "Use it everywhere", eTitle: "One converter, four ways to use it",
+    eLede: "The same format table and quality defaults (shared/formats.json, kept in sync by automated tests), so a file converts the same wherever you convert it.",
+    e1t: "Web page", e1: "Drop files on the page, pick a format, download. Runs in the browser (ffmpeg.wasm + canvas) — nothing is uploaded.",
+    e2t: "Browser extension", e2: "Right-click an image or video on any page → download it already converted. The popup lists every media file on the page. Chrome, Edge, Brave; Safari via Xcode.",
+    e3t: "Mac — Quick Actions", e3: "Right-click in Finder → \"Convert to MP4 / MP3 / JPG…\" converts right away; only formats that fit the file appear. Includes the app and Spec Check.",
+    e4t: "Windows — right-click menu", e4: "Right-click in Explorer → \"Convert with File Converter\" → pick a format. One PowerShell command to install, no admin rights.",
+    eNote: "The extension downloads media that exists as real files on the page; YouTube and other protected streaming sites aren't supported (their terms and Chrome Web Store policy).",
+    tTag: "Theme", tTitle: "How it maps to the AX Hero themes",
+    tLede: "The core is theme #2, with AI helping exactly where people spend the most effort: reading long spec documents.",
+    t1tag: "Theme #2", t1t: "Find errors in work products", t1: "Compare the work product (media files) with the standard (spec) and flag the differences, so people only check those spots.",
+    t1a: "Automatic comparison with expected vs actual", t1b: "Only failing rows shown; passing ones hidden", t1c: "Automatic fix, re-checked with the same rules",
+    t2tag: "AI + people", t2t: "AI drafts the spec, a person decides", t2: "Paste a partner's email or help page and Claude turns it into a structured spec. The draft stays flagged until a person has reviewed every field.",
+    t2a: "Only the text is sent, never files", t2b: "No invented values: not stated = left empty", t2c: "Everything else works without an API key",
+    iTag: "Expected impact", iTitle: "How much time could your team save?", iLede: "Move the sliders to match your real volume. These are estimates for discussion, to be measured in a pilot.",
+    in1: "Files checked per week", in2: "Minutes of manual checking per file", in3: "Share of files rejected (%)",
+    outLabel: "Time saved per month (estimate)", outDetail: "≈ {d} working days · {r} fix-and-resend loops avoided",
+    assume: "Assumptions: ~10 s per file to review Spec Check results; each rejection costs ~15 extra minutes to fix and resend; 4.3 weeks/month; 8 h/day. Illustrative numbers, not measurements.",
+    lTag: "Limits", lTitle: "Being clear about what it can't do yet",
+    l1: "<b>Too-short videos</b> or anything needing a re-edit: the app doesn't invent content, it explains why.",
+    l2: "<b>AI-drafted specs</b> always need a human review — the draft stays flagged until you confirm it.",
+    l3: "<b>No .mov output</b>; a .mov-only spec gets a clear \"export from your editor\" message.",
+    l4: "<b>Status:</b> the check/fix engine passes 93 automated tests, including real ffmpeg conversions; the macOS screens are being finished and still need a first run on a Mac.",
+    bTag: "Install & tech", bTitle: "One command to install", bLede: "Installs Homebrew (if needed), ffmpeg, ImageMagick and the app. Then right-click any file in Finder → Quick Actions.",
+    st1: "automated tests", st2: "rules checked", st3: "example specs included", st4: "files uploaded anywhere",
+    footer: "Spec Check — a new feature of File Converter for macOS (GPL-3.0 open source). Built with Claude Code for the AX Hero program.",
+  }
+};
+
+let lang = (() => {
+  try { const s = localStorage.getItem("speccheck-lang"); if (s && STR[s]) return s; } catch (e) {}
+  const n = (navigator.language || "vi").slice(0, 2); return STR[n] ? n : "vi";
+})();
+const t = (k) => STR[lang][k] ?? STR.en[k] ?? k;
+const fmt = (n, d = 0) => new Intl.NumberFormat(lang, { maximumFractionDigits: d }).format(n);
+
+function render() {
+  document.documentElement.lang = lang;
+  document.title = "Spec Check — " + (lang === "vi" ? "Giới thiệu" : lang === "ko" ? "서비스 소개" : "Introduction");
+  document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
+  document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  document.getElementById("rules").innerHTML = t("rules").map((r) => "<span>" + r + "</span>").join("");
+  calc();
+}
+
+function calc() {
+  const files = +document.getElementById("files").value;
+  const manual = +document.getElementById("manual").value;
+  const reject = +document.getElementById("reject").value;
+  document.getElementById("v-files").textContent = fmt(files);
+  document.getElementById("v-manual").textContent = fmt(manual);
+  document.getElementById("v-reject").textContent = fmt(reject) + "%";
+  const perMonth = files * 4.3;
+  const savedCheck = perMonth * (manual - 10 / 60);           // minutes
+  const rejectsAvoided = perMonth * reject / 100;              // loops
+  const savedMin = Math.max(0, savedCheck + rejectsAvoided * 15);
+  const hours = savedMin / 60;
+  document.getElementById("hours").textContent = fmt(hours, hours < 10 ? 1 : 0) + (lang === "ko" ? "시간" : lang === "vi" ? " giờ" : " h");
+  document.getElementById("out-detail").textContent = t("outDetail").replace("{d}", fmt(hours / 8, 1)).replace("{r}", fmt(Math.round(rejectsAvoided)));
+}
+
+document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => {
+  lang = b.dataset.lang; try { localStorage.setItem("speccheck-lang", lang); } catch (e) {} render();
+}));
+["files", "manual", "reject"].forEach((id) => document.getElementById(id).addEventListener("input", calc));
+render();
+</script>
+</body>
+</html>
